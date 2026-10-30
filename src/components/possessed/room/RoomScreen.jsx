@@ -9,7 +9,7 @@ const SETTLE_TEXT = {
   offline: 'The connection dropped before the house answered. Try again once you are back online.',
 };
 
-export default function RoomScreen({ session, prefs, onFatal, onSeated, onExit, onNewHaunt }) {
+export default function RoomScreen({ session, prefs, onFatal, onSeated, onExit, onNewHaunt, onFindNew }) {
   const fb = useFeedback();
   const ctx = useRef({});
   const { view, status, pending, act, leave } = useHauntRoom(session, {
@@ -24,6 +24,8 @@ export default function RoomScreen({ session, prefs, onFatal, onSeated, onExit, 
 
   const doLeave = () => { leave(); setTimeout(onExit, 150); };
   const doNewHaunt = () => { leave(); setTimeout(onNewHaunt, 150); };
+  const doFindNew = () => { leave(); setTimeout(onFindNew, 150); };
   if (!view) return <Connecting code={session.code} onCancel={() => onExit()} />;
-  return <RoomView view={view} status={status} pending={pending} act={act} fb={fb} prefs={prefs} onLeave={doLeave} onNewHaunt={doNewHaunt} />;
+  return <RoomView view={view} status={status} pending={pending} act={act} fb={fb} prefs={prefs} onLeave={doLeave} onNewHaunt={doNewHaunt}
+    quick={!!session.quick} onFindNew={doFindNew} />;
 }

@@ -1,4 +1,4 @@
-import { Home, Plus } from 'lucide-react';
+import { Home, Plus, Search } from 'lucide-react';
 import SeatList from '@/components/possessed/room/SeatList';
 import BigButton from '@/components/possessed/room/BigButton';
 import PrimaryAction from '@/components/possessed/room/PrimaryAction';
@@ -7,7 +7,7 @@ import SurvivalCard from '@/components/possessed/room/SurvivalCard';
 import ShareResult from '@/components/possessed/room/ShareResult';
 import { precisionFor, secs } from '@/lib/possessed/format';
 
-export default function FinalPanel({ view, act, pending, onLeave, onNewHaunt }) {
+export default function FinalPanel({ view, act, pending, onLeave, onNewHaunt, quick = false, onFindNew }) {
   const [r1, r2] = view.results;
   const me = view.seats[view.you];
   const digits = precisionFor(r1.survivalMs, r2.survivalMs);
@@ -39,7 +39,9 @@ export default function FinalPanel({ view, act, pending, onLeave, onNewHaunt }) 
       </PrimaryAction>
       <div className="grid grid-cols-3 gap-2">
         <ShareResult survivalMs={mine?.survivalMs ?? 0} />
-        <BigButton compact tone="ghost" onClick={onNewHaunt}><Plus className="h-5 w-5" aria-hidden="true" />New haunt</BigButton>
+        {quick
+          ? <BigButton compact tone="ghost" onClick={onFindNew}><Search className="h-5 w-5" aria-hidden="true" />Find new opponent</BigButton>
+          : <BigButton compact tone="ghost" onClick={onNewHaunt}><Plus className="h-5 w-5" aria-hidden="true" />New haunt</BigButton>}
         <BigButton compact tone="ghost" onClick={onLeave}><Home className="h-5 w-5" aria-hidden="true" />Home</BigButton>
       </div>
     </div>

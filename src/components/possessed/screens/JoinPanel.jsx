@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { normalizeCode, isValidCode } from '@/lib/possessed/roomCode';
 
-export default function JoinPanel({ name, onName, joining, setJoining, initialCode, busy, error, onCreate, onJoin }) {
+export default function JoinPanel({ name, onName, joining, setJoining, initialCode, busy, error, onCreate, onJoin, quick = null, searching = false }) {
   const [code, setCode] = useState(normalizeCode(initialCode));
   const valid = isValidCode(code);
   const submit = (e) => { e.preventDefault(); if (valid && !busy) onJoin(code); };
@@ -18,16 +18,24 @@ export default function JoinPanel({ name, onName, joining, setJoining, initialCo
         />
       </label>
       {!joining ? (
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 short:grid-cols-1">
-          <button type="button" onClick={onCreate} disabled={busy}
-            className="flex h-14 items-center justify-center gap-2 rounded-xl bg-pumpkin px-4 font-display text-lg font-bold text-ink shadow-[0_6px_0_#b86f17] transition active:translate-y-1 active:shadow-[0_2px_0_#b86f17] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-parchment disabled:opacity-60">
-            {busy && <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />} Create a Haunt
-          </button>
-          <button type="button" onClick={() => setJoining(true)} disabled={busy}
-            className="h-14 rounded-xl border-2 border-spectral px-4 font-display text-lg font-bold text-spectral transition hover:bg-spectral/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-parchment">
-            Join a Friend
-          </button>
-        </div>
+        <>
+          {quick}
+          {!searching && (
+            <div>
+              <p className="mb-1.5 text-sm font-extrabold text-parchment/75">Play with a friend</p>
+              <div className="grid grid-cols-2 gap-2.5">
+                <button type="button" onClick={onCreate} disabled={busy}
+                  className="flex h-12 items-center justify-center gap-2 rounded-xl border-2 border-pumpkin px-2 font-display text-base font-bold text-pumpkin transition hover:bg-pumpkin/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-parchment disabled:opacity-60 sm:text-lg">
+                  {busy && <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />} Create a Haunt
+                </button>
+                <button type="button" onClick={() => setJoining(true)} disabled={busy}
+                  className="h-12 rounded-xl border-2 border-spectral px-2 font-display text-base font-bold text-spectral transition hover:bg-spectral/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-parchment sm:text-lg">
+                  Join a Friend
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       ) : (
         <form onSubmit={submit} className="space-y-2.5">
           <label className="block">

@@ -1,9 +1,9 @@
 import { Ghost, Search, Repeat } from 'lucide-react';
 
 const RULES = [
-  { icon: Ghost, text: 'Hide inside an object.' },
-  { icon: Search, text: 'Find your friend before they move.' },
-  { icon: Repeat, text: 'Swap roles. Survive longer to win.' },
+  { icon: Ghost, text: 'Ghost: hide in the furniture.' },
+  { icon: Search, text: 'Hunter: search before time runs out.' },
+  { icon: Repeat, text: 'Swap roles. Longer survival wins.' },
 ];
 
 export default function HowToPlay() {

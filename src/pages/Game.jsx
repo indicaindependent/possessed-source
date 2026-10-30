@@ -12,6 +12,7 @@ export default function Game() {
   const prefs = usePrefs();
   const [session, setSession] = useState(loadSession);
   const [error, setError] = useState(null);
+  const [autoSearch, setAutoSearch] = useState(false);
   const current = useRef(session);
   current.current = session;
 
@@ -22,7 +23,7 @@ export default function Game() {
     return () => { window.removeEventListener('pointerdown', unlock); window.removeEventListener('keydown', unlock); };
   }, []);
 
-  const begin = useCallback((s) => { saveSession(s); setError(null); setSession(s); }, []);
+  const begin = useCallback((s) => { saveSession(s); setError(null); setAutoSearch(false); setSession(s); }, []);
 
   const exit = useCallback((message = null) => {
     if (current.current) forgetConn(current.current.code);
@@ -54,11 +55,14 @@ export default function Game() {
       <NightSky />
       {session ? (
         <RoomScreen session={session} prefs={prefs} onFatal={onFatal} onSeated={onSeated} onExit={() => exit()}
-          onNewHaunt={() => { const name = session.name; exit(); begin({ code: generateCode(), intent: 'create', name, attempt: 0 }); }} />
+          onNewHaunt={() => { const name = session.name; exit(); begin({ code: generateCode(), intent: 'create', name, attempt: 0 }); }}
+          onFindNew={() => { exit(); setAutoSearch(true); }} />
       ) : (
         <HomeScreen
           initialCode={initialCode}
           error={error}
+          autoSearch={autoSearch}
+          onQuickMatch={(code, name) => begin({ code, intent: 'quick', quick: true, name })}
           onCreate={(name) => begin({ code: generateCode(), intent: 'create', name, attempt: 0 })}
           onJoin={(code, name) => begin({ code, intent: 'join', name })}
         />
