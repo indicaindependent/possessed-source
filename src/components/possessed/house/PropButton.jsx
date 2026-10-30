@@ -3,7 +3,7 @@ import { OBJECTS, roomName } from '@/lib/possessed/layout';
 import useArtFrame from '@/lib/possessed/useArtFrame';
 import PropOverlays from '@/components/possessed/house/PropOverlays';
 
-export default function PropButton({ id, interactive, disabled, state = {}, onPick }) {
+export default function PropButton({ id, interactive, disabled, label: showLabel = true, state = {}, onPick }) {
   const Art = PROP_ART[id];
   const obj = OBJECTS[id];
   const { boxRef, artRef, style } = useArtFrame();
@@ -32,9 +32,11 @@ export default function PropButton({ id, interactive, disabled, state = {}, onPi
           <PropOverlays state={state} />
         </span>
       </span>
-      <span className="mt-0.5 max-w-full text-center text-[12px] font-extrabold leading-tight text-parchment drop-shadow-[0_1px_1px_rgba(0,0,0,.9)] sm:text-sm">
-        {obj.name}
-      </span>
+      {showLabel && (
+        <span className="mt-0.5 max-w-full text-center text-[12px] font-extrabold leading-tight text-parchment drop-shadow-[0_1px_1px_rgba(0,0,0,.9)] sm:text-sm">
+          {obj.name}
+        </span>
+      )}
     </button>
   );
 }

@@ -2,7 +2,7 @@ import { Eye } from 'lucide-react';
 import { ROOMS } from '@/lib/possessed/layout';
 import PropButton from '@/components/possessed/house/PropButton';
 
-export default function HouseRoom({ roomId, interactive, disabledAll, propStates, clueKey, onPick }) {
+export default function HouseRoom({ roomId, interactive, disabledAll, labels = true, propStates, clueKey, onPick }) {
   const room = ROOMS[roomId];
   const clued = Boolean(clueKey);
   return (
@@ -22,7 +22,7 @@ export default function HouseRoom({ roomId, interactive, disabledAll, propStates
       </div>
       <div className="relative z-10 flex min-h-0 flex-1 items-stretch gap-1 px-1 pb-1 sm:gap-3 sm:px-3">
         {room.objects.map((id) => (
-          <PropButton key={id} id={id} interactive={interactive} disabled={disabledAll} state={propStates?.[id]} onPick={onPick} />
+          <PropButton key={id} id={id} interactive={interactive} disabled={disabledAll} label={labels} state={propStates?.[id]} onPick={onPick} />
         ))}
       </div>
       <div className="floorboards h-2.5 shrink-0 sm:h-3.5" aria-hidden="true" />

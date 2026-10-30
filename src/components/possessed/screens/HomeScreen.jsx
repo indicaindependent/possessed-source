@@ -22,7 +22,7 @@ export default function HomeScreen({ initialCode = '', busy, error, onCreate, on
       </header>
 
       <div className="pointer-events-none relative z-0 -my-2 flex w-full max-w-3xl flex-1 items-center opacity-90" aria-hidden="true">
-        <HauntedHouse className="h-[42vh] min-h-[260px] md:h-[46vh]" />
+        <HauntedHouse decorative className="h-[42vh] min-h-[260px] md:h-[46vh]" />
       </div>
 
       <section className="fade-up relative z-10 w-full max-w-md rounded-2xl border border-parchment/15 bg-ink/85 p-4 shadow-2xl backdrop-blur-md sm:p-5">

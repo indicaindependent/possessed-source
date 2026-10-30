@@ -6,7 +6,7 @@ export default function NightSky() {
       {STARS.map(([x, y], i) => (
         <span key={i} className="absolute rounded-full bg-parchment" style={{ left: `${x}%`, top: `${y}%`, width: i % 3 ? 2 : 3, height: i % 3 ? 2 : 3, opacity: 0.55 }} />
       ))}
-      <div className="moon-glow absolute right-[8%] top-[6%] h-20 w-20 rounded-full bg-parchment md:h-28 md:w-28">
+      <div className="moon-glow absolute right-[3%] top-[1.5%] h-12 w-12 rounded-full bg-parchment sm:right-[8%] sm:top-[6%] sm:h-20 sm:w-20 md:h-28 md:w-28">
         <span className="absolute left-[22%] top-[30%] h-4 w-4 rounded-full bg-[#eadcbc]" />
         <span className="absolute left-[55%] top-[55%] h-3 w-3 rounded-full bg-[#eadcbc]" />
       </div>
