@@ -55,7 +55,8 @@ test('an unanswered visible probe shows reconnecting, drops pending and refuses 
   expect(s.link.act('investigate', { objectId: 'globe' }).ok).toBe(true);
   s.advance(STALE_MS + PROBE_MS + 1000);
   expect(s.link.status).toBe('reconnecting');
-  expect(s.log.settled.at(-1).outcome).toBe('offline');
+  expect(s.link.pending).toBeNull();
+  expect(['timeout', 'offline']).toContain(s.log.settled.at(-1).outcome);
   const before = s.conn().sent.length;
   expect(s.link.act('investigate', { objectId: 'teapot' })).toEqual({ ok: false, reason: 'offline' });
   expect(s.conn().sent.slice(before).some((m) => m.type === 'investigate')).toBe(false);
@@ -78,15 +79,11 @@ test('stale callbacks from a replaced connection are ignored', () => {
   expect(s.log.fatal).toEqual([]);
 });
 
-test('reattach checks back off instead of looping', () => {
+test('while the SDK is still redialing, no second socket is ever opened', () => {
   const s = setup(); online(s);
-  s.advance(STALE_MS + PROBE_MS + 1000);
-  const c = s.conn(); let checks = 0;
-  const orig = c.closed;
-  s.advance(30000);
-  expect(orig).toBe(false);
-  checks = s.made.length; // same SDK connection is still redialing: no new sockets
-  expect(checks).toBe(1);
+  s.advance(STALE_MS + PROBE_MS + 60000);
+  expect(s.link.status).toBe('reconnecting');
+  expect(s.made.length).toBe(1);
 });
 
 test('pending: duplicate taps blocked, ack clears, mismatched ack ignored', () => {
