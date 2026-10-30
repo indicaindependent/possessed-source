@@ -235,6 +235,27 @@ export default function tests(G, C, assert) {
       const same = A(s, ghost, 'possess', { objectId: b }, at(30000));
       assert(same.some((e) => e.msg.reason === 'same_object'), 'same object rejected');
     }],
+    ['a brief lobby drop keeps Ready; only vacating clears it', () => {
+      const s = lobby();
+      A(s, 0, 'ready', { value: true });
+      G.disconnect(s, 0, T0 + 100);
+      assert(s.seats[0].ready === true, 'ready kept during grace');
+      G.reconnect(s, 0, T0 + 4000);
+      assert(s.seats[0].ready === true && s.phase === 'lobby', 'ready kept after reconnect');
+      G.disconnect(s, 1, T0 + 5000);
+      A(s, 0, 'ready', { value: true }, T0 + 5000);
+      G.advance(s, T0 + 5000 + B.reconnectGraceMs);
+      assert(s.seats[1] === null && s.seats[0].ready === false, 'vacating clears ready');
+    }],
+    ['both ready with one briefly offline starts on reconnect', () => {
+      const s = lobby();
+      A(s, 0, 'ready', { value: true });
+      G.disconnect(s, 1, T0 + 100);
+      A(s, 1, 'ready', { value: true }, T0 + 100); // queued before the socket dropped
+      assert(s.phase === 'lobby', 'no start while offline');
+      G.reconnect(s, 1, T0 + 3000);
+      assert(s.phase === 'countdown', 'starts once both are back');
+    }],
     ['leaving mid-match abandons; leaving in lobby frees the seat', () => {
       const s = lobby();
       G.leave(s, 1);

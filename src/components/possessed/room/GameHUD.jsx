@@ -3,33 +3,38 @@ import RoleChip from '@/components/possessed/room/RoleChip';
 import HunterMeter from '@/components/possessed/room/HunterMeter';
 import GhostMeter from '@/components/possessed/room/GhostMeter';
 import TimeBar from '@/components/possessed/room/TimeBar';
-import { secs } from '@/lib/possessed/format';
+import RoundTimer from '@/components/possessed/room/RoundTimer';
 import { roomName } from '@/lib/possessed/layout';
 
-export default function GameHUD({ view, d, announce }) {
+function clueText(view, d) {
+  if (view.phase === 'countdown') return `First clue at ${Math.round(view.balance.clueTimesMs[0] / 1000)}s`;
+  if (d.nextClueIn != null) return `Next clue in ${Math.ceil(d.nextClueIn / 1000)}s`;
+  return 'No more clues';
+}
+
+export default function GameHUD({ view, d, pulse }) {
   const B = view.balance;
   return (
-    <div className="mx-1.5 mt-1.5 shrink-0 rounded-xl border border-parchment/10 bg-ink/85 px-3 py-2 backdrop-blur sm:mx-auto sm:w-full sm:max-w-5xl">
+    <div className="relative mx-1.5 mt-1.5 shrink-0 rounded-xl border border-parchment/10 bg-ink/85 px-2.5 py-1.5 backdrop-blur sm:mx-auto sm:w-full sm:max-w-5xl sm:px-3 sm:py-2">
+      {pulse && <span key={pulse} className="heartbeat pointer-events-none absolute inset-0 rounded-xl" aria-hidden="true" />}
       <div className="flex items-center gap-2">
         <RoleChip role={view.role} />
-        <span className="text-sm font-bold text-parchment/75">Round {view.round}/2</span>
-        <p className="ml-auto leading-none">
-          <span className="font-display text-3xl font-black tabular-nums text-parchment sm:text-4xl">{secs(d.remainingMs)}</span>
-          <span className="ml-1 text-sm font-bold text-parchment/70">s left</span>
-        </p>
+        <span className="shrink-0 text-sm font-bold text-parchment/75">R{view.round}/2</span>
+        <span className="flex min-w-0 items-center gap-1 text-[13px] font-bold text-parchment/85">
+          <Eye className="h-4 w-4 shrink-0 text-pumpkin" aria-hidden="true" />
+          <span className="truncate">{clueText(view, d)}</span>
+        </span>
+        <RoundTimer remainingMs={d.remainingMs} final={view.phase === 'active' && d.remainingMs <= 10000} />
       </div>
       <TimeBar activeMs={d.activeMs} roundMs={B.roundMs} clueTimesMs={B.clueTimesMs} />
-      <div className="mt-1.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+      <div className="mt-1 flex items-center gap-3 overflow-hidden">
         {view.role === 'ghost'
           ? <GhostMeter objectId={view.ghost?.objectId} readyIn={d.ghostReadyIn} cooldownMs={B.moveCooldownMs} />
           : <HunterMeter charges={d.charges ?? 0} max={B.maxCharges} refill={d.refill} regenMs={B.chargeRegenMs} />}
-        <span className="flex items-center gap-1 text-[13px] font-bold text-parchment/80">
-          <Eye className="h-4 w-4 text-pumpkin" aria-hidden="true" />
-          {d.nextClueIn != null ? `Clue in ${secs(d.nextClueIn)}s` : 'No more clues'}
-          {view.lastClue && <span className="text-pumpkin">· Last: {roomName(view.lastClue.room)}</span>}
-        </span>
+        {view.lastClue && (
+          <span className="ml-auto shrink-0 text-[13px] font-extrabold text-pumpkin">Last clue: {roomName(view.lastClue.room)}</span>
+        )}
       </div>
-      <p aria-live="polite" className="mt-1 min-h-[1.25rem] truncate text-sm font-extrabold text-spectral">{announce.text}</p>
     </div>
   );
 }

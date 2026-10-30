@@ -185,6 +185,8 @@ export default class HauntRoom extends Actor {
     if (!this.live()) return;
     const i = G.seatOf(this.s, conn.id);
     if (i < 0 || !this.ownsSeat(conn, i)) return; // an impostor's socket closing must not affect the seat
+    // The client already reopened a fresh socket for this seat: the old one closing is not a disconnect.
+    if (this.getConnections().some((c) => c !== conn && c.id === conn.id && this.ownsSeat(c, i))) return;
     const now = Date.now();
     await this.commit([...G.advance(this.s, now), ...G.disconnect(this.s, i, now)]);
   }

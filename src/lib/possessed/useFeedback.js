@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { sfx } from '@/lib/possessed/audio';
-import { objectName, roomName } from '@/lib/possessed/layout';
+import { objectName, roomName, roomOfObject } from '@/lib/possessed/layout';
 import { REJECT_TEXT, secs } from '@/lib/possessed/format';
 
 // Turns server events into short-lived visuals, sounds and a text equivalent for each.
@@ -9,6 +9,8 @@ export default function useFeedback() {
   const [clue, setClue] = useState(null);
   const [celebrate, setCelebrate] = useState(null);
   const [announce, setAnnounce] = useState({ text: '', id: 0 });
+  const [pulse, setPulse] = useState(null);
+  const [flourish, setFlourish] = useState(null);
   const timers = useRef(new Set());
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
@@ -33,7 +35,18 @@ export default function useFeedback() {
     const n = objectName(e.objectId);
     switch (e.kind) {
       case 'empty': flash(e.objectId, 'empty', 1100); sfx.knock(); say(`Empty. Nothing in the ${n}.`); break;
-      case 'searched': flash(e.objectId, 'searched', 1100); sfx.searched(); say(`The Hunter searched the ${n}.`); break;
+      case 'searched': {
+        flash(e.objectId, 'searched', 1100);
+        sfx.searched();
+        if (ctx.ghostObject && roomOfObject(e.objectId) === roomOfObject(ctx.ghostObject)) {
+          const stamp = Date.now();
+          setPulse(stamp);
+          later(() => setPulse((p) => (p === stamp ? null : p)), 1300);
+          sfx.heartbeat();
+          say(`The Hunter searched the ${n}. They're close...`);
+        } else say(`The Hunter searched the ${n}.`);
+        break;
+      }
       case 'moved': flash(e.from, 'ripple', 1000); sfx.move(); say(`You slipped into the ${n}.`); break;
       case 'ripple': flash(e.objectId, 'ripple', 1000); sfx.ripple(); say(`A spectral ripple! Something just left the ${n}.`); break;
       case 'clue': {
@@ -52,6 +65,9 @@ export default function useFeedback() {
         const mine = r.ghostSeat === ctx.you;
         if (r.outcome === 'caught') {
           sfx.caught();
+          const stamp = Date.now();
+          setFlourish(stamp);
+          later(() => setFlourish((f) => (f === stamp ? null : f)), 1800);
           say(mine ? `Caught in the ${where} after ${secs(r.survivalMs, 2)}s!` : `You caught ${r.ghostName} in the ${where} at ${secs(r.survivalMs, 2)}s!`);
         } else {
           sfx.survived();
@@ -73,5 +89,5 @@ export default function useFeedback() {
     }
   }, [flash, later, say]);
 
-  return { marks, clue, celebrate, announce, handle, say };
+  return { marks, clue, celebrate, announce, pulse, flourish, handle, say };
 }

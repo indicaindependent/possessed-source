@@ -13,6 +13,7 @@ export default function JoinPanel({ name, onName, joining, setJoining, initialCo
         <span className="text-sm font-extrabold text-parchment/80">Display name (optional)</span>
         <input
           value={name} onChange={(e) => onName(e.target.value.slice(0, 16))} maxLength={16} placeholder="e.g. Mabel"
+          autoFocus={isValidCode(normalizeCode(initialCode))}
           className="mt-1 h-12 w-full rounded-xl border-2 border-parchment/20 bg-plum/60 px-4 text-base font-medium text-parchment placeholder:text-parchment/40 focus:border-pumpkin focus:outline-none"
         />
       </label>
@@ -32,7 +33,7 @@ export default function JoinPanel({ name, onName, joining, setJoining, initialCo
           <label className="block">
             <span className="text-sm font-extrabold text-parchment/80">Room code</span>
             <input
-              value={code} onChange={(e) => setCode(normalizeCode(e.target.value))} autoFocus inputMode="text" autoCapitalize="characters" autoComplete="off"
+              value={code} onChange={(e) => setCode(normalizeCode(e.target.value))} autoFocus={!isValidCode(normalizeCode(initialCode))} inputMode="text" autoCapitalize="characters" autoComplete="off"
               aria-invalid={code.length === 6 && !valid} placeholder="ABCDEF"
               className="mt-1 h-14 w-full rounded-xl border-2 border-parchment/20 bg-plum/60 text-center font-mono text-2xl font-bold uppercase tracking-[0.4em] text-parchment placeholder:text-parchment/25 focus:border-spectral focus:outline-none"
             />

@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { toast } from '@/components/ui/use-toast';
 import { instanceIdFor } from '@/lib/possessed/roomCode';
 import { connIdFor } from '@/lib/possessed/session';
+
+const STALE_MS = 6000;   // no message for this long: show "Reconnecting"
+const REOPEN_MS = 9000;  // still nothing: drop the socket and open a fresh one (same seat id)
 
 // One socket per room code per tab. Callbacks live in a ref so re-renders never reconnect.
 export default function useHauntRoom(session, { onEvent, onFatal, onSeated }) {
@@ -14,16 +18,18 @@ export default function useHauntRoom(session, { onEvent, onFatal, onSeated }) {
 
   useEffect(() => {
     if (!code) return undefined;
-    const room = base44.actors.HauntRoom(instanceIdFor(code)).connect({ id: connIdFor(code) });
-    roomRef.current = room;
+    let room = null;
+    let sub = null;
     let lastHeard = Date.now();
     let seated = false;
     let fatal = false;
-    const hello = () => room.send({ type: 'hello', intent: cb.current.intent, name: cb.current.name });
+    let wasLost = false;
+    const hello = () => room?.send({ type: 'hello', intent: cb.current.intent, name: cb.current.name });
 
-    const sub = room.subscribe((msg) => {
+    const onMsg = (msg) => {
       if (!msg || typeof msg !== 'object' || fatal) return;
       lastHeard = Date.now();
+      if (wasLost) { wasLost = false; toast({ title: 'Reconnected', description: 'You are back in the haunt.', duration: 2500 }); }
       setStatus('online');
       if (msg.type === 'state') {
         if (!seated) { seated = true; cb.current.onSeated?.(); }
@@ -37,22 +43,40 @@ export default function useHauntRoom(session, { onEvent, onFatal, onSeated }) {
         fatal = true;
         cb.current.onFatal?.(msg.code);
       }
-    });
-    hello();
+    };
 
-    const ping = setInterval(() => {
-      room.send({ type: 'ping' });
-      if (Date.now() - lastHeard > 6000) setStatus('reconnecting');
-    }, 2500);
-    const onVisible = () => { if (document.visibilityState === 'visible') room.send({ type: 'sync' }); };
+    const open = () => {
+      room = base44.actors.HauntRoom(instanceIdFor(code)).connect({ id: connIdFor(code) });
+      roomRef.current = room;
+      sub = room.subscribe(onMsg);
+      lastHeard = Date.now();
+      hello();
+    };
+    const shut = () => {
+      sub?.unsubscribe();
+      room?.close();
+      if (roomRef.current === room) roomRef.current = null;
+    };
+    open();
+
+    const check = () => {
+      if (fatal) return;
+      const quiet = Date.now() - lastHeard;
+      if (quiet > STALE_MS && seated) { wasLost = true; setStatus('reconnecting'); }
+      if (quiet > REOPEN_MS) { shut(); open(); }
+    };
+    const ping = setInterval(() => { room?.send({ type: 'ping' }); check(); }, 2500);
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      room?.send({ type: 'sync' });
+      check();
+    };
     document.addEventListener('visibilitychange', onVisible);
 
     return () => {
       clearInterval(ping);
       document.removeEventListener('visibilitychange', onVisible);
-      sub.unsubscribe();
-      room.close();
-      if (roomRef.current === room) roomRef.current = null;
+      shut();
       setView(null);
       setStatus('connecting');
     };

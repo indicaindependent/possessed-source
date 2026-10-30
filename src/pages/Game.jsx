@@ -53,7 +53,8 @@ export default function Game() {
     <>
       <NightSky />
       {session ? (
-        <RoomScreen session={session} prefs={prefs} onFatal={onFatal} onSeated={onSeated} onExit={() => exit()} />
+        <RoomScreen session={session} prefs={prefs} onFatal={onFatal} onSeated={onSeated} onExit={() => exit()}
+          onNewHaunt={() => { const name = session.name; exit(); begin({ code: generateCode(), intent: 'create', name, attempt: 0 }); }} />
       ) : (
         <HomeScreen
           initialCode={initialCode}

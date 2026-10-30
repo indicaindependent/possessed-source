@@ -45,8 +45,10 @@ export function Portrait() {
       <circle cx="50" cy="47" r="11" fill="#151221" />
       <path d="M40 42 L42 29 L48 37 Z M60 42 L58 29 L52 37 Z" fill="#151221" />
       <g className="portrait-eyes">
-        <ellipse cx="45.5" cy="46.5" rx="2.3" ry="2.8" fill="#FFAD42" />
-        <ellipse cx="54.5" cy="46.5" rx="2.3" ry="2.8" fill="#FFAD42" />
+        <g className="blink">
+          <ellipse cx="45.5" cy="46.5" rx="2.3" ry="2.8" fill="#FFAD42" />
+          <ellipse cx="54.5" cy="46.5" rx="2.3" ry="2.8" fill="#FFAD42" />
+        </g>
       </g>
       <path d="M43 61 Q50 66 57 61 Q50 70 43 61 Z" fill="#FFF0D4" opacity=".9" />
       <circle cx="21" cy="13" r="3" fill="#FFAD42" /><circle cx="79" cy="13" r="3" fill="#FFAD42" />

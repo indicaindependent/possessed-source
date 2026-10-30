@@ -79,8 +79,7 @@ export function disconnect(s, i, now) {
   if (!st || !st.connected) return [];
   st.connected = false;
   st.graceUntil = now + B.reconnectGraceMs;
-  st.ready = false;
-  st.rematch = false;
+  // Ready/rematch survive a brief drop; they're only cleared if the seat is vacated.
   if (s.phase === 'countdown' || s.phase === 'active') pause(s, now);
   return [ev(1 - i, 'friend_disconnected')];
 }
@@ -91,7 +90,14 @@ export function reconnect(s, i, now) {
   st.connected = true;
   st.graceUntil = null;
   const out = [ev(1 - i, 'friend_back')];
-  if (s.paused && s.seats.every((x) => x && x.connected)) { resume(s, now); out.push(ev('all', 'resumed')); }
+  const allIn = s.seats.every((x) => x && x.connected);
+  if (s.paused && allIn) { resume(s, now); out.push(ev('all', 'resumed')); }
+  // Both had pressed Ready (or Rematch) before the drop: carry on.
+  if (allIn && s.seats.every((x) => x.ready)) {
+    if (s.phase === 'lobby') out.push(...startMatch(s, now));
+    else if (s.phase === 'intermission') out.push(...setupRound(s, 2, now));
+  }
+  if (allIn && s.phase === 'final' && s.seats.every((x) => x.rematch)) out.push(...startMatch(s, now));
   return out;
 }
 

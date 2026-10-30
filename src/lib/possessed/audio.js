@@ -11,8 +11,34 @@ export function unlockAudio() {
     master = ctx.createGain();
     master.gain.value = muted ? 0 : 0.6;
     master.connect(ctx.destination);
+    startWind();
   }
   if (ctx.state === 'suspended') ctx.resume();
+}
+
+// Very quiet looping wind under everything; goes through master, so mute silences it too.
+function startWind() {
+  const len = ctx.sampleRate * 4;
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  let last = 0;
+  for (let i = 0; i < len; i++) { last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02; data[i] = last * 3.5; }
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  src.loop = true;
+  const f = ctx.createBiquadFilter();
+  f.type = 'lowpass';
+  f.frequency.value = 420;
+  const g = ctx.createGain();
+  g.gain.value = 0.05;
+  const lfo = ctx.createOscillator();
+  const depth = ctx.createGain();
+  lfo.frequency.value = 0.09;
+  depth.gain.value = 0.035;
+  lfo.connect(depth).connect(g.gain);
+  src.connect(f).connect(g).connect(master);
+  src.start();
+  lfo.start();
 }
 
 export function setAudioMuted(m) {
@@ -68,5 +94,7 @@ export const sfx = {
   ripple: play(() => tone(880, { dur: 0.4, to: 440, gain: 0.06 })),
   searched: play(() => noise({ dur: 0.2, from: 900, to: 500, gain: 0.06 })),
   go: play(() => { tone(784, { dur: 0.25, gain: 0.14 }); tone(1175, { at: 0.1, dur: 0.4, gain: 0.12 }); }),
+  heartbeat: play(() => { tone(62, { dur: 0.16, gain: 0.4, to: 45 }); tone(58, { at: 0.24, dur: 0.2, gain: 0.32, to: 42 }); }),
+  softTick: play(() => tone(1320, { dur: 0.06, gain: 0.035 })),
   tick: play(() => tone(660, { dur: 0.09, gain: 0.07, type: 'square' })),
 };
