@@ -12,7 +12,7 @@ export default function SurvivalCard({ r, name, digits, winner }) {
       <p className={`font-display text-3xl font-black tabular-nums ${winner ? 'text-pumpkin' : 'text-parchment'}`}>
         {secs(r.survivalMs, digits)}<span className="ml-0.5 text-base">s</span>
       </p>
-      <p className="truncate text-[13px] font-bold text-parchment/70">
+      <p className="text-[13px] font-bold leading-snug text-parchment/70">
         {r.outcome === 'caught' ? 'Caught in the' : 'Survived in the'} {objectName(r.hidingObject)}
       </p>
     </div>

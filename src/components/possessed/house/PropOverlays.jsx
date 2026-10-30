@@ -1,6 +1,6 @@
 import GhostFace from '@/components/possessed/art/GhostFace';
 
-function Badge({ children, tone = 'parchment', k }) {
+function Badge({ children, tone = 'parchment', k, extra = '' }) {
   const tones = {
     parchment: 'bg-parchment text-ink',
     mint: 'bg-spectral text-ink',
@@ -8,7 +8,7 @@ function Badge({ children, tone = 'parchment', k }) {
     ink: 'bg-ink text-parchment border border-parchment/40',
   };
   return (
-    <span key={k} className={`pop-in absolute left-1/2 top-0 z-20 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full px-2 py-0.5 text-[12px] font-extrabold uppercase tracking-wide shadow-lg sm:text-[13px] ${tones[tone]}`}>
+    <span key={k} className={`pop-in absolute left-1/2 top-0 z-20 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full px-2 py-0.5 text-[12px] font-extrabold uppercase tracking-wide shadow-lg sm:text-[13px] ${tones[tone]} ${extra}`}>
       {children}
     </span>
   );
@@ -41,9 +41,10 @@ export default function PropOverlays({ state }) {
         </span>
       )}
       {state.pending && !state.empty && <Badge tone="ink">{state.pending === 'possess' ? 'Moving…' : 'Checking…'}</Badge>}
-      {state.possessed && !state.pending && <Badge tone="mint">You're here</Badge>}
+      {/* Short landscape: the badge would cover the drawing; the outline + HUD "Inside:" carry it. */}
+      {state.possessed && !state.pending && <Badge tone="mint" extra="short:hidden">You're here</Badge>}
       {state.caught && <Badge tone="amber">Caught!</Badge>}
-      {state.survivedHere && <Badge tone="mint">Hid here</Badge>}
+      {state.survivedHere && <Badge tone="mint" extra="short:hidden">Hid here</Badge>}
       {state.empty && <Badge k={state.empty} tone="parchment">Empty</Badge>}
       {state.searched && !state.possessed && <Badge k={state.searched} tone="ink">Searched</Badge>}
       {state.ripple && !state.possessed && !state.empty && <Badge k={state.ripple} tone="mint">Ripple</Badge>}
