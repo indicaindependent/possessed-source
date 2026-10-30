@@ -77,9 +77,11 @@ export default class HauntRoom extends Actor {
     for (let i = 0; i < 2; i++) this.connFor(i)?.send(G.view(this.s, i, now));
   }
 
-  async commit(out = []) {
+  // ack: the sender's own actionId, sent after the outcome so the client can clear "pending".
+  async commit(out = [], ack = null) {
     this.deliver(out);
     this.sendViews();
+    if (ack?.actionId) ack.conn.send({ type: 'ack', actionId: ack.actionId });
     await this.storage.put('state', this.s);
     const d = G.nextDeadline(this.s);
     if (d && d !== this.scheduledDeadline) { this.scheduledDeadline = d; await this.schedule('deadline', d + 100); }
@@ -126,7 +128,7 @@ export default class HauntRoom extends Actor {
   async handleMessage(conn, msg) {
     if (!msg || typeof msg !== 'object' || typeof msg.type !== 'string') return;
     if (!this.allow(conn.id)) {
-      if (msg.type !== 'ping') conn.send({ type: 'ev', kind: 'rejected', reason: 'rate_limited' });
+      if (msg.type !== 'ping') conn.send({ type: 'ev', kind: 'rejected', reason: 'rate_limited', actionId: str(msg.actionId, LIMITS.actionIdMax) ?? null });
       return;
     }
     await this.load();
@@ -154,7 +156,8 @@ export default class HauntRoom extends Actor {
       conn.send({ type: 'left' });
       return this.commit(out);
     }
-    await this.commit([...heal, ...G.act(this.s, i, sanitize(msg), now)]);
+    const clean = sanitize(msg);
+    await this.commit([...heal, ...G.act(this.s, i, clean, now)], { conn, actionId: clean.actionId });
   }
 
   async hello(conn, msg, now) {

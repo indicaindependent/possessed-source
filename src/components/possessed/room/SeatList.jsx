@@ -1,6 +1,8 @@
 import { Check, Hourglass, UserPlus, WifiOff } from 'lucide-react';
+import { useDerived } from '@/lib/possessed/clock';
 
-export default function SeatList({ view, d, field, yes, no }) {
+export default function SeatList({ view, field, yes, no }) {
+  const d = useDerived(view, view.seats.some((s) => s && !s.connected) ? 250 : 0);
   return (
     <ul className="grid grid-cols-2 gap-2">
       {[view.you, 1 - view.you].map((k) => {

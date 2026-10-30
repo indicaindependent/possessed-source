@@ -1,9 +1,13 @@
+import { memo } from 'react';
 import { PROP_ART } from '@/components/possessed/art/propArt';
 import { OBJECTS, roomName } from '@/lib/possessed/layout';
 import useArtFrame from '@/lib/possessed/useArtFrame';
 import PropOverlays from '@/components/possessed/house/PropOverlays';
 
-export default function PropButton({ id, interactive, disabled, label: showLabel = true, state = {}, onPick }) {
+const EMPTY = {};
+
+// Memoized: a prop only re-renders when its own state changes (taps, marks), never for the clock.
+function PropButton({ id, interactive, disabled, label: showLabel = true, state = EMPTY, onPick }) {
   const Art = PROP_ART[id];
   const obj = OBJECTS[id];
   const { boxRef, artRef, style } = useArtFrame();
@@ -15,11 +19,12 @@ export default function PropButton({ id, interactive, disabled, label: showLabel
       tabIndex={interactive ? 0 : -1}
       aria-hidden={interactive ? undefined : true}
       aria-label={label}
+      aria-busy={state.pending ? true : undefined}
       aria-disabled={!interactive || disabled ? 'true' : undefined}
       onClick={() => interactive && !disabled && onPick?.(id)}
-      className={`prop-btn relative flex h-full min-h-[44px] min-w-[44px] flex-1 flex-col items-center justify-end rounded-xl px-0.5 pb-1 outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-pumpkin ${
+      className={`prop-btn relative flex h-full min-h-[44px] min-w-[44px] flex-1 basis-0 flex-col items-center justify-end rounded-xl px-0.5 pb-1 outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-pumpkin ${
         interactive && !disabled ? 'cursor-pointer' : 'cursor-default'
-      }`}
+      } ${state.pending ? 'bg-parchment/10' : ''}`}
     >
       <span ref={boxRef} className="relative w-full min-h-0 flex-1">
         <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMax meet" className={`prop-art absolute inset-0 h-full w-full ${state.possessed ? 'possessed-art' : ''} ${state.ripple ? 'rippling-art' : ''}`}>
@@ -40,3 +45,5 @@ export default function PropButton({ id, interactive, disabled, label: showLabel
     </button>
   );
 }
+
+export default memo(PropButton);

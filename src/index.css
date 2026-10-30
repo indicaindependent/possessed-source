@@ -43,8 +43,8 @@
 
 @layer base {
   * { @apply border-border outline-ring/50; }
-  html, body { overflow-x: hidden; }
   body { @apply bg-background text-foreground font-body; -webkit-tap-highlight-color: transparent; }
+  button, a, input, [role="button"] { touch-action: manipulation; }
 }
 
 /* ---------- Night & house atmosphere ---------- */
@@ -84,10 +84,9 @@
 .prop-btn:not([aria-disabled="true"]):hover .prop-art,
 .prop-btn:focus-visible .prop-art { transform: translateY(-3px); filter: drop-shadow(0 0 10px rgba(255,173,66,.55)); }
 .prop-btn:active .prop-art { transform: translateY(0) scale(.97); }
-.possessed-art { filter: drop-shadow(0 0 8px rgba(141,243,209,.85)); animation: possessed-glow 2.4s ease-in-out infinite; }
-@keyframes possessed-glow { 0%,100% { filter: drop-shadow(0 0 6px rgba(141,243,209,.6)); } 50% { filter: drop-shadow(0 0 14px rgba(141,243,209,.95)); } }
-.possessed-frame { box-shadow: 0 0 10px rgba(141,243,209,.35), inset 0 0 10px rgba(141,243,209,.2); animation: frame-glow 2.4s ease-in-out infinite; }
-@keyframes frame-glow { 0%,100% { box-shadow: 0 0 6px rgba(141,243,209,.25), inset 0 0 6px rgba(141,243,209,.12); } 50% { box-shadow: 0 0 16px rgba(141,243,209,.55), inset 0 0 12px rgba(141,243,209,.28); } }
+/* Static glows: animating filter/box-shadow repaints every frame and competed with taps on phones. */
+.possessed-art { filter: drop-shadow(0 0 8px rgba(141,243,209,.85)); }
+.possessed-frame { box-shadow: 0 0 10px rgba(141,243,209,.4), inset 0 0 10px rgba(141,243,209,.2); }
 .rippling-art { filter: drop-shadow(0 0 10px rgba(141,243,209,.9)); }
 /* Ripple fits inside its 1s display window and ends still faintly visible. */
 .ripple-ring { animation: ripple .9s ease-out forwards; }
@@ -136,6 +135,9 @@
 @keyframes fade-up { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 .countdown-num { animation: count-pop 1s ease-out; }
 @keyframes count-pop { from { transform: scale(1.5); opacity: 0; } 25% { transform: scale(1); opacity: 1; } to { opacity: .9; } }
+
+/* ---------- In a room: no continuous decorative loops (SVG repaints compete with input) ---------- */
+.calm .idle, .calm .blink, .calm .fog, .calm .fog-slow, .calm .portrait-eyes, .calm .glint { animation: none !important; }
 
 /* ---------- Reduced motion ---------- */
 .reduce-motion *, .reduce-motion *::before, .reduce-motion *::after { animation: none !important; transition: none !important; }

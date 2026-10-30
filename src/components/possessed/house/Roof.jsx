@@ -1,6 +1,6 @@
 export default function Roof() {
   return (
-    <div className="relative h-10 w-full sm:h-14 md:h-20" aria-hidden="true">
+    <div className="relative h-8 w-full shrink-0 sm:h-12 md:h-16 lg:h-20 short:h-5" aria-hidden="true">
       <div className="absolute bottom-0 right-[18%] h-[90%] w-[6%] min-w-4 bg-[#2b1d3a] shadow-[inset_0_6px_0_#1b1226]" />
       <div className="shingles absolute inset-0" style={{ clipPath: 'polygon(2% 100%, 50% 0%, 98% 100%)' }} />
       <div className="absolute bottom-[18%] left-1/2 h-[42%] aspect-square -translate-x-1/2 rounded-full border-[3px] border-[#5A3324] bg-pumpkin/80 shadow-[0_0_24px_rgba(255,173,66,.6)]">

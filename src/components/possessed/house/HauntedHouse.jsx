@@ -7,11 +7,13 @@ import GhostFace from '@/components/possessed/art/GhostFace';
 
 export default memo(HauntedHouse);
 
-// decorative: a non-interactive backdrop — always 2x2 and unlabeled so it stays legible when small.
+// Play grid: one room per row on portrait phones (keeps every prop >=44px with a readable label),
+// 2x2 when there is width (md+) or on short landscape screens.
+// decorative: non-interactive backdrop, always 2x2 and unlabeled so it stays legible when small.
 function HauntedHouse({ interactive = false, disabledAll = false, decorative = false, propStates, clue, celebrate, onPick, className = '' }) {
-  const grid = decorative ? 'grid-cols-2 grid-rows-2' : 'grid-cols-1 grid-rows-4 md:grid-cols-2 md:grid-rows-2';
+  const grid = decorative ? 'grid-cols-2 grid-rows-2' : 'grid-cols-1 grid-rows-4 md:grid-cols-2 md:grid-rows-2 short:grid-cols-2 short:grid-rows-2';
   return (
-    <div className={`relative mx-auto flex w-full max-w-5xl flex-col ${className}`}>
+    <div className={`relative mx-auto flex w-full min-w-0 max-w-5xl flex-col ${className}`}>
       <Roof />
       <div className={`siding grid min-h-0 flex-1 ${grid} gap-1.5 border-x-[6px] border-[#1b1226] p-1.5 shadow-[0_20px_60px_rgba(0,0,0,.6)] md:gap-2.5 md:p-2.5`}>
         {ROOM_ORDER.map((roomId) => (
@@ -27,9 +29,9 @@ function HauntedHouse({ interactive = false, disabledAll = false, decorative = f
           />
         ))}
       </div>
-      <div className="relative h-3 shrink-0 bg-[#1b1226] sm:h-4" aria-hidden="true">
-        <Pumpkin className="absolute -top-7 left-1 h-9 w-11 sm:-top-9 sm:h-12 sm:w-14" />
-        <Pumpkin className="absolute -top-6 right-2 h-8 w-10 sm:-top-8 sm:h-10 sm:w-12" />
+      <div className="pointer-events-none relative h-3 shrink-0 bg-[#1b1226] sm:h-4" aria-hidden="true">
+        <Pumpkin className="absolute -top-5 left-1 h-7 w-8 sm:-top-9 sm:h-12 sm:w-14" />
+        <Pumpkin className="absolute -top-4 right-2 h-6 w-7 sm:-top-8 sm:h-10 sm:w-12" />
       </div>
       {celebrate && (
         <div key={celebrate} className="pointer-events-none absolute inset-0 z-30 overflow-hidden" aria-hidden="true">

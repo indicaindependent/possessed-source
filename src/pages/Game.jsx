@@ -50,7 +50,7 @@ export default function Game() {
   const initialCode = new URLSearchParams(window.location.search).get('room') || '';
 
   return (
-    <>
+    <div className={session ? 'calm' : undefined}>
       <NightSky />
       {session ? (
         <RoomScreen session={session} prefs={prefs} onFatal={onFatal} onSeated={onSeated} onExit={() => exit()}
@@ -63,6 +63,6 @@ export default function Game() {
           onJoin={(code, name) => begin({ code, intent: 'join', name })}
         />
       )}
-    </>
+    </div>
   );
 }

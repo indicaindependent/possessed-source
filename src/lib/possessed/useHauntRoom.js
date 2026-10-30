@@ -3,89 +3,59 @@ import { base44 } from '@/api/base44Client';
 import { toast } from '@/components/ui/use-toast';
 import { instanceIdFor } from '@/lib/possessed/roomCode';
 import { connIdFor } from '@/lib/possessed/session';
+import { createRoomLink, TICK_MS } from '@/lib/possessed/roomLink';
+import { devLog } from '@/lib/possessed/devlog';
 
-const STALE_MS = 6000;   // no message for this long: show "Reconnecting"
-const REOPEN_MS = 9000;  // still nothing: drop the socket and open a fresh one (same seat id)
-
-// One socket per room code per tab. Callbacks live in a ref so re-renders never reconnect.
-export default function useHauntRoom(session, { onEvent, onFatal, onSeated }) {
+// Exactly one live link per mounted room. Callbacks live in a ref so renders never reconnect.
+export default function useHauntRoom(session, { onEvent, onFatal, onSeated, onSettled }) {
   const [view, setView] = useState(null);
   const [status, setStatus] = useState('connecting');
-  const roomRef = useRef(null);
+  const [pending, setPending] = useState(null);
+  const linkRef = useRef(null);
   const cb = useRef({});
-  cb.current = { onEvent, onFatal, onSeated, intent: session?.intent, name: session?.name };
+  cb.current = { onEvent, onFatal, onSeated, onSettled, intent: session?.intent, name: session?.name };
   const code = session?.code;
 
   useEffect(() => {
     if (!code) return undefined;
-    let room = null;
-    let sub = null;
-    let lastHeard = Date.now();
     let seated = false;
-    let fatal = false;
-    let wasLost = false;
-    const hello = () => room?.send({ type: 'hello', intent: cb.current.intent, name: cb.current.name });
-
-    const onMsg = (msg) => {
-      if (!msg || typeof msg !== 'object' || fatal) return;
-      lastHeard = Date.now();
-      if (wasLost) { wasLost = false; toast({ title: 'Reconnected', description: 'You are back in the haunt.', duration: 2500 }); }
-      setStatus('online');
-      if (msg.type === 'state') {
+    let lost = false;
+    const link = createRoomLink({
+      ref: base44.actors.HauntRoom(instanceIdFor(code)),
+      connId: connIdFor(code),
+      hello: () => ({ type: 'hello', intent: cb.current.intent, name: cb.current.name }),
+      onState: (msg) => {
         if (!seated) { seated = true; cb.current.onSeated?.(); }
         setView({ ...msg, receivedAt: performance.now() });
-      } else if (msg.type === 'ev') {
-        cb.current.onEvent?.(msg);
-      } else if (msg.type === 'pong') {
-        if (!msg.seated) hello();
-      } else if (msg.type === 'error') {
-        if (msg.code === 'not_seated') { hello(); return; }
-        fatal = true;
-        cb.current.onFatal?.(msg.code);
-      }
-    };
-
-    const open = () => {
-      room = base44.actors.HauntRoom(instanceIdFor(code)).connect({ id: connIdFor(code) });
-      roomRef.current = room;
-      sub = room.subscribe(onMsg);
-      lastHeard = Date.now();
-      hello();
-    };
-    const shut = () => {
-      sub?.unsubscribe();
-      room?.close();
-      if (roomRef.current === room) roomRef.current = null;
-    };
-    open();
-
-    const check = () => {
-      if (fatal) return;
-      const quiet = Date.now() - lastHeard;
-      if (quiet > STALE_MS && seated) { wasLost = true; setStatus('reconnecting'); }
-      if (quiet > REOPEN_MS) { shut(); open(); }
-    };
-    const ping = setInterval(() => { room?.send({ type: 'ping' }); check(); }, 2500);
-    const onVisible = () => {
-      if (document.visibilityState !== 'visible') return;
-      room?.send({ type: 'sync' });
-      check();
-    };
-    document.addEventListener('visibilitychange', onVisible);
-
+      },
+      onEvent: (msg) => cb.current.onEvent?.(msg),
+      onFatal: (c) => cb.current.onFatal?.(c),
+      onStatus: (s) => {
+        setStatus(s);
+        if (s === 'reconnecting') lost = true;
+        if (s === 'online' && lost) { lost = false; toast({ title: 'Reconnected', description: 'You are back in the haunt.', duration: 2500 }); }
+      },
+      onPending: (p, done) => { setPending(p); if (done) cb.current.onSettled?.(done); },
+      log: devLog,
+    });
+    linkRef.current = link;
+    link.start();
+    const timer = setInterval(() => link.tick(document.visibilityState === 'visible'), TICK_MS);
+    const onVis = () => { if (document.visibilityState === 'visible') link.visible(); };
+    document.addEventListener('visibilitychange', onVis);
     return () => {
-      clearInterval(ping);
-      document.removeEventListener('visibilitychange', onVisible);
-      shut();
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVis);
+      link.stop();
+      if (linkRef.current === link) linkRef.current = null;
       setView(null);
       setStatus('connecting');
+      setPending(null);
     };
   }, [code]);
 
-  const act = useCallback((type, payload = {}) => {
-    roomRef.current?.send({ type, actionId: crypto.randomUUID().slice(0, 18), ...payload });
-  }, []);
-  const leave = useCallback(() => roomRef.current?.send({ type: 'leave' }), []);
+  const act = useCallback((type, payload) => linkRef.current?.act(type, payload) ?? { ok: false, reason: 'offline' }, []);
+  const leave = useCallback(() => linkRef.current?.leave(), []);
 
-  return { view, status, act, leave };
+  return { view, status, pending, act, leave };
 }

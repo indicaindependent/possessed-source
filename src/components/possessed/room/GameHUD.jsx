@@ -1,9 +1,12 @@
+import { useEffect } from 'react';
 import { Eye } from 'lucide-react';
 import RoleChip from '@/components/possessed/room/RoleChip';
 import HunterMeter from '@/components/possessed/room/HunterMeter';
 import GhostMeter from '@/components/possessed/room/GhostMeter';
 import TimeBar from '@/components/possessed/room/TimeBar';
 import RoundTimer from '@/components/possessed/room/RoundTimer';
+import { useDerived } from '@/lib/possessed/clock';
+import { sfx } from '@/lib/possessed/audio';
 import { roomName } from '@/lib/possessed/layout';
 
 function clueText(view, d) {
@@ -12,10 +15,15 @@ function clueText(view, d) {
   return 'No more clues';
 }
 
-export default function GameHUD({ view, d, pulse }) {
+// The only component that ticks during play (10x/s); the house never re-renders for the clock.
+export default function GameHUD({ view, pulse }) {
   const B = view.balance;
+  const d = useDerived(view, view.phase === 'active' && view.clock.running ? 100 : 0);
+  const final = view.phase === 'active' && !view.clock.paused && d.remainingMs > 0 && d.remainingMs <= 10000;
+  const finalSecond = final ? Math.ceil(d.remainingMs / 1000) : null;
+  useEffect(() => { if (finalSecond) sfx.softTick(); }, [finalSecond]);
   return (
-    <div className="relative mx-1.5 mt-1.5 shrink-0 rounded-xl border border-parchment/10 bg-ink/85 px-2.5 py-1.5 backdrop-blur sm:mx-auto sm:w-full sm:max-w-5xl sm:px-3 sm:py-2">
+    <div className="relative mx-1.5 mt-1.5 shrink-0 rounded-xl border border-parchment/10 bg-ink/85 px-2.5 py-1.5 backdrop-blur sm:mx-auto sm:w-full sm:max-w-5xl sm:px-3 sm:py-2 short:py-1">
       {pulse && <span key={pulse} className="heartbeat pointer-events-none absolute inset-0 rounded-xl" aria-hidden="true" />}
       <div className="flex items-center gap-2">
         <RoleChip role={view.role} />
@@ -24,7 +32,7 @@ export default function GameHUD({ view, d, pulse }) {
           <Eye className="h-4 w-4 shrink-0 text-pumpkin" aria-hidden="true" />
           <span className="truncate">{clueText(view, d)}</span>
         </span>
-        <RoundTimer remainingMs={d.remainingMs} final={view.phase === 'active' && d.remainingMs <= 10000} />
+        <RoundTimer remainingMs={d.remainingMs} final={final} />
       </div>
       <TimeBar activeMs={d.activeMs} roundMs={B.roundMs} clueTimesMs={B.clueTimesMs} />
       <div className="mt-1 flex items-center gap-3 overflow-hidden">

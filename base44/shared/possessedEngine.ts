@@ -189,7 +189,7 @@ export function act(s, i, msg, now) {
   const out = advance(s, now);
   const st = s.seats[i];
   if (!st) return out;
-  const reject = (reason) => { out.push(ev(i, 'rejected', { reason, action: msg.type })); return out; };
+  const reject = (reason) => { out.push(ev(i, 'rejected', { reason, action: msg.type, actionId: msg.actionId ?? null })); return out; };
 
   if (DEDUP.has(msg.type)) {
     const aid = msg.actionId;

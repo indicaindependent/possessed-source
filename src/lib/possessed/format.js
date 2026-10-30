@@ -6,6 +6,21 @@ export function precisionFor(a, b) {
   return secs(a, 2) === secs(b, 2) ? 3 : 2;
 }
 
+// Round-2 instructions from round 1's result. Scoring is "longer survival wins, equal is a draw",
+// so a full-length survival can only be TIED by the next Ghost, never beaten.
+export function nextRoundGoal(r, roundMs, nextIsGhost) {
+  const t = secs(r.survivalMs, 2);
+  const full = secs(roundMs, 0);
+  if (r.survivalMs >= roundMs) {
+    return nextIsGhost
+      ? `They survived the full ${full}s. Survive all ${full}s to draw; that can't be beaten.`
+      : `Catch your friend at any point to win. If they also survive all ${full}s, it's a draw.`;
+  }
+  return nextIsGhost
+    ? `Survive longer than ${t}s to win. Exactly ${t}s is a draw.`
+    : `Catch your friend before ${t}s to win.`;
+}
+
 export const REJECT_TEXT = {
   no_charges: 'No charges left. Wait for a refill.',
   cooldown: "Your next move isn't ready yet.",

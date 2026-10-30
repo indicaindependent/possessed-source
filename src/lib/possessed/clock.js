@@ -11,6 +11,12 @@ export function useNowTick(active, ms = 100) {
   return active ? now : performance.now();
 }
 
+// Ticking projection for ONE small component (HUD, countdown, grace timers). ms = 0 stops ticking.
+export function useDerived(view, ms) {
+  const now = useNowTick(Boolean(view) && ms > 0, ms || 1000);
+  return view ? derive(view, now) : null;
+}
+
 // Project server-reported durations forward from the moment the snapshot arrived.
 export function derive(view, now) {
   const B = view.balance;

@@ -40,7 +40,8 @@ export default function PropOverlays({ state }) {
           <GhostFace mood="happy" className="ghost-rise ghost-bob h-[85%] w-auto drop-shadow-[0_0_16px_rgba(141,243,209,.8)]" />
         </span>
       )}
-      {state.possessed && <Badge tone="mint">You're here</Badge>}
+      {state.pending && !state.empty && <Badge tone="ink">{state.pending === 'possess' ? 'Moving…' : 'Checking…'}</Badge>}
+      {state.possessed && !state.pending && <Badge tone="mint">You're here</Badge>}
       {state.caught && <Badge tone="amber">Caught!</Badge>}
       {state.survivedHere && <Badge tone="mint">Hid here</Badge>}
       {state.empty && <Badge k={state.empty} tone="parchment">Empty</Badge>}
