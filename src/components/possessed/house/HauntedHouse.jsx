@@ -29,9 +29,9 @@ function HauntedHouse({ interactive = false, disabledAll = false, decorative = f
           />
         ))}
       </div>
-      <div className="pointer-events-none relative h-3 shrink-0 bg-[#1b1226] sm:h-4" aria-hidden="true">
-        <Pumpkin className="absolute -top-5 left-1 h-7 w-8 sm:-top-9 sm:h-12 sm:w-14" />
-        <Pumpkin className="absolute -top-4 right-2 h-6 w-7 sm:-top-8 sm:h-10 sm:w-12" />
+      <div className="pointer-events-none relative h-3 shrink-0 bg-[#1b1226] sm:h-4 short:h-2" aria-hidden="true">
+        <Pumpkin className="absolute -top-5 left-1 h-7 w-8 sm:-top-9 sm:h-12 sm:w-14 short:-top-5 short:h-7 short:w-8" />
+        <Pumpkin className="absolute -top-4 right-2 h-6 w-7 sm:-top-8 sm:h-10 sm:w-12 short:-top-4 short:h-6 short:w-7" />
       </div>
       {celebrate && (
         <div key={celebrate} className="pointer-events-none absolute inset-0 z-30 overflow-hidden" aria-hidden="true">

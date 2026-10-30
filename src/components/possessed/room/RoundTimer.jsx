@@ -7,7 +7,7 @@ export default function RoundTimer({ remainingMs, final }) {
     <p className="ml-auto shrink-0 leading-none">
       <span
         key={final ? whole : 'calm'}
-        className={`inline-block font-display text-2xl font-black tabular-nums sm:text-4xl ${final ? 'timer-pulse text-pumpkin' : 'text-parchment'}`}
+        className={`inline-block font-display text-2xl font-black tabular-nums sm:text-4xl short:text-2xl ${final ? 'timer-pulse text-pumpkin' : 'text-parchment'}`}
       >
         {secs(remainingMs)}
       </span>

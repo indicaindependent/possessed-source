@@ -20,12 +20,12 @@ export default function HouseRoom({ roomId, interactive, disabledAll, labels = t
           </span>
         )}
       </div>
-      <div className="relative z-10 flex min-h-0 min-w-0 flex-1 items-stretch gap-1 px-1 pb-0.5 sm:gap-3 sm:px-3">
+      <div className="relative z-10 flex min-h-0 min-w-0 flex-1 items-stretch gap-1 px-1 pb-0.5 sm:gap-3 sm:px-3 short:gap-1 short:px-1">
         {room.objects.map((id) => (
           <PropButton key={id} id={id} interactive={interactive} disabled={disabledAll} label={labels} state={propStates?.[id]} onPick={onPick} />
         ))}
       </div>
-      <div className="floorboards h-2.5 shrink-0 sm:h-3.5" aria-hidden="true" />
+      <div className="floorboards h-2.5 shrink-0 sm:h-3.5 short:h-1.5" aria-hidden="true" />
     </section>
   );
 }

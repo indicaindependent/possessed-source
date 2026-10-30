@@ -23,7 +23,7 @@ export default function GameHUD({ view, pulse }) {
   const finalSecond = final ? Math.ceil(d.remainingMs / 1000) : null;
   useEffect(() => { if (finalSecond) sfx.softTick(); }, [finalSecond]);
   return (
-    <div className="relative mx-1.5 mt-1.5 shrink-0 rounded-xl border border-parchment/10 bg-ink/85 px-2.5 py-1.5 backdrop-blur sm:mx-auto sm:w-full sm:max-w-5xl sm:px-3 sm:py-2 short:py-1">
+    <div className="relative mx-1.5 mt-1.5 shrink-0 rounded-xl border border-parchment/10 bg-ink/85 px-2.5 py-1.5 backdrop-blur sm:mx-auto sm:w-full sm:max-w-5xl sm:px-3 sm:py-2 short:mt-1 short:py-1">
       {pulse && <span key={pulse} className="heartbeat pointer-events-none absolute inset-0 rounded-xl" aria-hidden="true" />}
       <div className="flex items-center gap-2">
         <RoleChip role={view.role} />

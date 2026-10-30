@@ -22,7 +22,7 @@ function PropButton({ id, interactive, disabled, label: showLabel = true, state 
       aria-busy={state.pending ? true : undefined}
       aria-disabled={!interactive || disabled ? 'true' : undefined}
       onClick={() => interactive && !disabled && onPick?.(id)}
-      className={`prop-btn relative flex h-full min-h-[44px] min-w-[44px] flex-1 basis-0 flex-col items-center justify-end rounded-xl px-0.5 pb-1 outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-pumpkin ${
+      className={`prop-btn relative flex h-full ${showLabel ? 'min-h-[44px] min-w-[44px]' : 'min-w-0'} flex-1 basis-0 flex-col items-center justify-end rounded-xl px-0.5 pb-1 outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-pumpkin ${
         interactive && !disabled ? 'cursor-pointer' : 'cursor-default'
       } ${state.pending ? 'bg-parchment/10' : ''}`}
     >
@@ -38,7 +38,7 @@ function PropButton({ id, interactive, disabled, label: showLabel = true, state 
         </span>
       </span>
       {showLabel && (
-        <span className="mt-0.5 max-w-full text-center text-[12px] font-extrabold leading-tight text-parchment drop-shadow-[0_1px_1px_rgba(0,0,0,.9)] sm:text-sm">
+        <span className="mt-0.5 max-w-full text-center text-[12px] font-extrabold leading-tight text-parchment drop-shadow-[0_1px_1px_rgba(0,0,0,.9)] sm:text-sm short:text-[12px]">
           {obj.name}
         </span>
       )}
