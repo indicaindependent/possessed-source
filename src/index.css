@@ -1,92 +1,110 @@
+@font-face { font-family: 'Recoleta'; src: url('https://media.base44.com/files/public/builder-assets/wix-fonts/recoleta-700-normal.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url('https://media.base44.com/files/public/builder-assets/wix-fonts/recoleta-900-normal.woff2') format('woff2'); font-weight: 900; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Avenir'; src: url('https://media.base44.com/files/public/builder-assets/wix-fonts/avenir-500-normal.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Avenir'; src: url('https://media.base44.com/files/public/builder-assets/wix-fonts/avenir-800-normal.woff2') format('woff2'); font-weight: 800; font-style: normal; font-display: swap; }
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
+    --background: 252 29% 10%;
+    --foreground: 39 100% 92%;
+    --card: 270 31% 19%;
+    --card-foreground: 39 100% 92%;
+    --popover: 270 31% 19%;
+    --popover-foreground: 39 100% 92%;
+    --primary: 34 100% 63%;
+    --primary-foreground: 252 29% 10%;
+    --secondary: 270 31% 19%;
+    --secondary-foreground: 39 100% 92%;
+    --muted: 270 25% 24%;
+    --muted-foreground: 35 40% 78%;
+    --accent: 160 81% 75%;
+    --accent-foreground: 252 29% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
+    --border: 270 22% 30%;
+    --input: 270 22% 30%;
+    --ring: 34 100% 63%;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-    --font-heading: ui-sans-serif, system-ui, sans-serif;
-    --font-body: ui-sans-serif, system-ui, sans-serif;
-    --font-display: ui-sans-serif, system-ui, sans-serif;
-    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --radius: 0.75rem;
+    --font-heading: 'Recoleta', Georgia, 'Times New Roman', serif;
+    --font-display: 'Recoleta', Georgia, 'Times New Roman', serif;
+    --font-body: 'Avenir', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   }
 }
 
-
-
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
+  * { @apply border-border outline-ring/50; }
+  html, body { overflow-x: hidden; }
+  body { @apply bg-background text-foreground font-body; -webkit-tap-highlight-color: transparent; }
+}
 
-  body {
-    @apply bg-background text-foreground font-body;
-  }
+/* ---------- Night & house atmosphere ---------- */
+.night-sky { background: radial-gradient(120% 80% at 70% 0%, #3a2850 0%, #241a36 35%, #151221 75%); }
+.moon-glow { box-shadow: 0 0 60px 18px rgba(255, 240, 212, 0.25), 0 0 140px 50px rgba(141, 243, 209, 0.08); }
+.fog { animation: fog-drift 48s linear infinite; }
+.fog-slow { animation: fog-drift 80s linear infinite reverse; }
+@keyframes fog-drift { from { transform: translateX(-25%); } to { transform: translateX(0%); } }
+
+.shingles { background: repeating-linear-gradient(0deg, #241830 0 7px, #1b1226 7px 9px), #241830; }
+.siding { background: repeating-linear-gradient(0deg, #2b1d3a 0 13px, #241830 13px 15px); }
+.wall-attic { background: repeating-linear-gradient(90deg, #3a2a3e 0 22px, #34253a 22px 24px); }
+.wall-library { background: repeating-linear-gradient(90deg, #1f3439 0 16px, #1b2e33 16px 32px); }
+.wall-parlor { background: radial-gradient(circle at 12px 12px, rgba(255,173,66,0.10) 2.5px, transparent 3px) 0 0 / 24px 24px, linear-gradient(#4a2a49, #3d2340); }
+.wall-kitchen { background: linear-gradient(transparent 55%, rgba(0,0,0,0.0) 55%), repeating-conic-gradient(#3b2f45 0 25%, #33283d 0 50%) 0 0 / 22px 22px; }
+.floorboards { background: repeating-linear-gradient(90deg, #5a3324 0 38px, #4b2a1e 38px 40px); }
+.candle-glow { background: radial-gradient(circle, rgba(255,173,66,0.35) 0%, rgba(255,173,66,0) 70%); animation: candle 4s ease-in-out infinite; }
+@keyframes candle { 0%,100% { opacity: .85; transform: scale(1); } 50% { opacity: 1; transform: scale(1.06); } }
+.flicker { animation: flicker 2.6s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes flicker { 0%,100% { transform: scaleY(1); opacity: .95; } 40% { transform: scaleY(1.08); opacity: 1; } 70% { transform: scaleY(.94); opacity: .9; } }
+
+/* ---------- Prop micro-animations ---------- */
+.pendulum { transform-box: view-box; transform-origin: 50px 56px; animation: swing 2s ease-in-out infinite; }
+@keyframes swing { 0%,100% { transform: rotate(9deg); } 50% { transform: rotate(-9deg); } }
+.bubble { animation: bubble 2.4s ease-in infinite; transform-box: fill-box; }
+.bubble.b2 { animation-delay: .8s; } .bubble.b3 { animation-delay: 1.6s; }
+@keyframes bubble { 0% { transform: translateY(0) scale(.6); opacity: 0; } 30% { opacity: 1; } 100% { transform: translateY(-14px) scale(1); opacity: 0; } }
+.steam { animation: steam 3.2s ease-in-out infinite; }
+@keyframes steam { 0% { transform: translateY(4px); opacity: 0; } 40% { opacity: .7; } 100% { transform: translateY(-6px); opacity: 0; } }
+.glint { animation: glint 5s ease-in-out infinite; }
+@keyframes glint { 0%,70%,100% { opacity: .15; } 80% { opacity: .5; } }
+.portrait-eyes { animation: glance 6s ease-in-out infinite; }
+@keyframes glance { 0%,40%,100% { transform: translateX(0); } 50%,80% { transform: translateX(2px); } }
+
+/* ---------- Gameplay feedback ---------- */
+.prop-art { transition: transform .18s ease, filter .18s ease; }
+.prop-btn:not([aria-disabled="true"]):hover .prop-art,
+.prop-btn:focus-visible .prop-art { transform: translateY(-3px); filter: drop-shadow(0 0 10px rgba(255,173,66,.55)); }
+.prop-btn:active .prop-art { transform: translateY(0) scale(.97); }
+.possessed-art { filter: drop-shadow(0 0 8px rgba(141,243,209,.85)); }
+.ripple-ring { animation: ripple 1s ease-out forwards; }
+.ripple-ring.r2 { animation-delay: .25s; }
+@keyframes ripple { from { transform: scale(.4); opacity: .95; } to { transform: scale(1.5); opacity: 0; } }
+.pop-in { animation: pop-in .22s ease-out; }
+@keyframes pop-in { from { transform: translate(-50%, 6px) scale(.85); opacity: 0; } to { transform: translate(-50%, 0) scale(1); opacity: 1; } }
+.ghost-rise { animation: ghost-rise .7s cubic-bezier(.2,1.4,.4,1); }
+@keyframes ghost-rise { from { transform: translateY(40%) scale(.5); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+.ghost-bob { animation: ghost-bob 2.4s ease-in-out infinite; }
+@keyframes ghost-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+.clue-room { box-shadow: inset 0 0 0 4px #FFAD42, inset 0 0 40px rgba(255,173,66,.45); animation: clue-glow 2s ease-in-out; }
+@keyframes clue-glow { 0% { box-shadow: inset 0 0 0 0 #FFAD42; } 20%,80% { box-shadow: inset 0 0 0 4px #FFAD42, inset 0 0 40px rgba(255,173,66,.45); } }
+.float-up { animation: float-up 3s ease-out forwards; }
+@keyframes float-up { from { transform: translateY(30px); opacity: 0; } 20% { opacity: 1; } to { transform: translateY(-160px); opacity: 0; } }
+.fade-up { animation: fade-up .35s ease-out; }
+@keyframes fade-up { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.countdown-num { animation: count-pop 1s ease-out; }
+@keyframes count-pop { from { transform: scale(1.5); opacity: 0; } 25% { transform: scale(1); opacity: 1; } to { opacity: .9; } }
+
+/* ---------- Reduced motion ---------- */
+.reduce-motion *, .reduce-motion *::before, .reduce-motion *::after { animation: none !important; transition: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 }
