@@ -18,7 +18,7 @@ export default function JoinPanel({ name, onName, joining, setJoining, initialCo
         />
       </label>
       {!joining ? (
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 short:grid-cols-1">
           <button type="button" onClick={onCreate} disabled={busy}
             className="flex h-14 items-center justify-center gap-2 rounded-xl bg-pumpkin px-4 font-display text-lg font-bold text-ink shadow-[0_6px_0_#b86f17] transition active:translate-y-1 active:shadow-[0_2px_0_#b86f17] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-parchment disabled:opacity-60">
             {busy && <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />} Create a Haunt

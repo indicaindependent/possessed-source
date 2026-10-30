@@ -9,6 +9,11 @@ import ScrollToTop from './components/ScrollToTop';
 // Add page imports here
 import Game from '@/pages/Game';
 import OgCard from '@/pages/OgCard';
+import DevFixture from '@/pages/DevFixture';
+import LayoutProbe from '@/components/possessed/dev/LayoutProbe';
+
+const DEV = import.meta.env.DEV;
+const probe = DEV && new URLSearchParams(window.location.search).get('probe') === '1';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -35,11 +40,15 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
-    <Routes>
-      <Route path="/" element={<Game />} />
-      <Route path="/og-card" element={<OgCard />} />
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<Game />} />
+        <Route path="/og-card" element={<OgCard />} />
+        {DEV && <Route path="/dev/fixture" element={<DevFixture />} />}
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+      {probe && <LayoutProbe />}
+    </>
   );
 };
 
