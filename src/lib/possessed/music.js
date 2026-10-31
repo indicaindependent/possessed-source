@@ -54,6 +54,9 @@ function playBar(ctx, out, [melody, bass, chord], t) {
 }
 
 export function startMusic(ctx, master) {
+  // Only one soundtrack may ever run; a leftover loop (e.g. after a code reload) would layer on top and sound faster.
+  const prev = globalThis.__possessedMusic;
+  if (prev) { clearInterval(prev.timer); prev.ctx.close().catch(() => {}); }
   const bus = ctx.createGain();
   bus.gain.setValueAtTime(0.0001, ctx.currentTime);
   bus.gain.exponentialRampToValueAtTime(0.55, ctx.currentTime + 4); // gentle fade-in
@@ -69,7 +72,7 @@ export function startMusic(ctx, master) {
 
   let next = ctx.currentTime + 0.2;
   let bar = 0;
-  setInterval(() => {
+  const timer = setInterval(() => {
     if (ctx.state !== 'running') return;
     if (next < ctx.currentTime) next = ctx.currentTime + 0.05; // resumed after an interruption
     while (next < ctx.currentTime + 0.6) {
@@ -78,4 +81,5 @@ export function startMusic(ctx, master) {
       bar = (bar + 1) % BARS.length;
     }
   }, 200);
+  globalThis.__possessedMusic = { timer, ctx };
 }
