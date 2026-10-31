@@ -15,11 +15,11 @@ export default function SoundToggle({ prefs }) {
 
   return (
     <div className="flex items-center gap-2">
-      {blocked && (
-        <span className="animate-pulse rounded-full border border-pumpkin/40 bg-ink/80 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.14em] text-pumpkin">
+      {blocked ? (
+        <button type="button" onClick={onClick} className="min-h-[44px] animate-pulse rounded-full border border-pumpkin/40 bg-ink/80 px-3 text-[11px] font-extrabold uppercase tracking-[0.14em] text-pumpkin">
           Tap for sound
-        </span>
-      )}
+        </button>
+      ) : (
       <IconToggle
         icon={prefs.muted ? VolumeX : Volume2}
         slashed={prefs.muted}
@@ -27,6 +27,7 @@ export default function SoundToggle({ prefs }) {
         label={prefs.muted ? 'Sound is off. Turn sound on' : blocked ? 'Tap to start the music' : 'Sound is on. Mute'}
         onClick={onClick}
       />
+      )}
     </div>
   );
 }
