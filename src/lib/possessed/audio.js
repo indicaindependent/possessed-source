@@ -1,19 +1,27 @@
+import { startMusic } from '@/lib/possessed/music';
+
 // Tiny Web Audio synth. The context is created only inside a user gesture (unlockAudio).
 let ctx = null;
 let master = null;
 let muted = typeof localStorage !== 'undefined' && localStorage.getItem('possessed:muted') === '1';
 
+// Must be called from a real activation gesture (click / touchend / pointerup / keydown);
+// phones do not count pointerdown on touch, so the audio would stay locked.
 export function unlockAudio() {
   if (!ctx) {
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
+    // iPhone: play as game audio even when the ring/silent switch is on (Safari 17+).
+    if (navigator.audioSession) navigator.audioSession.type = 'playback';
     ctx = new AC();
     master = ctx.createGain();
     master.gain.value = muted ? 0 : 0.6;
     master.connect(ctx.destination);
     startWind();
+    startMusic(ctx, master);
   }
-  if (ctx.state === 'suspended') ctx.resume();
+  // 'suspended' (autoplay lock) or 'interrupted' (iOS after a call or backgrounding).
+  if (ctx.state !== 'running') ctx.resume().catch(() => {});
 }
 
 // Very quiet looping wind under everything; goes through master, so mute silences it too.
@@ -28,9 +36,9 @@ function startWind() {
   src.loop = true;
   const f = ctx.createBiquadFilter();
   f.type = 'lowpass';
-  f.frequency.value = 420;
+  f.frequency.value = 900; // phone speakers can't reproduce the old 420 Hz rumble
   const g = ctx.createGain();
-  g.gain.value = 0.05;
+  g.gain.value = 0.06;
   const lfo = ctx.createOscillator();
   const depth = ctx.createGain();
   lfo.frequency.value = 0.09;
@@ -86,7 +94,7 @@ const play = (fn) => () => { if (ctx && !muted && ctx.state === 'running') fn();
 
 export const sfx = {
   investigate: play(() => noise({ dur: 0.28, from: 1400, to: 400, gain: 0.1 })),
-  knock: play(() => { tone(150, { dur: 0.14, gain: 0.35, to: 70 }); tone(150, { at: 0.17, dur: 0.14, gain: 0.3, to: 70 }); }),
+  knock: play(() => [0, 0.17].forEach((at) => { tone(240, { at, dur: 0.14, gain: 0.3, to: 110, type: 'triangle' }); noise({ at, dur: 0.06, from: 2200, to: 900, gain: 0.12 }); })),
   chime: play(() => { tone(1046, { dur: 1.2, gain: 0.14 }); tone(1568, { at: 0.02, dur: 1, gain: 0.07 }); tone(784, { at: 0.2, dur: 1.1, gain: 0.1 }); }),
   caught: play(() => { [523, 659, 784, 1046].forEach((f, i) => tone(f, { at: i * 0.08, dur: 0.35, type: 'triangle', gain: 0.18 })); tone(1568, { at: 0.36, dur: 0.8, gain: 0.1 }); }),
   survived: play(() => { tone(330, { dur: 1.1, to: 660, gain: 0.14, attack: 0.15 }); tone(495, { at: 0.25, dur: 1, to: 880, gain: 0.08, attack: 0.15 }); }),
@@ -94,7 +102,7 @@ export const sfx = {
   ripple: play(() => tone(880, { dur: 0.4, to: 440, gain: 0.06 })),
   searched: play(() => noise({ dur: 0.2, from: 900, to: 500, gain: 0.06 })),
   go: play(() => { tone(784, { dur: 0.25, gain: 0.14 }); tone(1175, { at: 0.1, dur: 0.4, gain: 0.12 }); }),
-  heartbeat: play(() => { tone(62, { dur: 0.16, gain: 0.4, to: 45 }); tone(58, { at: 0.24, dur: 0.2, gain: 0.32, to: 42 }); }),
+  heartbeat: play(() => [[0, 0.4], [0.24, 0.32]].forEach(([at, gain]) => { tone(62, { at, dur: 0.18, gain, to: 45 }); tone(130, { at, dur: 0.14, gain: gain * 0.6, to: 90, type: 'triangle' }); })),
   softTick: play(() => tone(1320, { dur: 0.06, gain: 0.035 })),
   tick: play(() => tone(660, { dur: 0.09, gain: 0.07, type: 'square' })),
 };

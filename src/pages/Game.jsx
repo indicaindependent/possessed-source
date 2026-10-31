@@ -17,10 +17,11 @@ export default function Game() {
   current.current = session;
 
   useEffect(() => {
+    // Only these events count as a user gesture for audio on phones (pointerdown on touch does not).
     const unlock = () => unlockAudio();
-    window.addEventListener('pointerdown', unlock);
-    window.addEventListener('keydown', unlock);
-    return () => { window.removeEventListener('pointerdown', unlock); window.removeEventListener('keydown', unlock); };
+    const events = ['pointerup', 'touchend', 'click', 'keydown'];
+    events.forEach((e) => window.addEventListener(e, unlock, { passive: true }));
+    return () => events.forEach((e) => window.removeEventListener(e, unlock));
   }, []);
 
   const begin = useCallback((s) => { saveSession(s); setError(null); setAutoSearch(false); setSession(s); }, []);
