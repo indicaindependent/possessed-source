@@ -1,27 +1,57 @@
 import { startMusic } from '@/lib/possessed/music';
 
-// Tiny Web Audio synth. The context is created only inside a user gesture (unlockAudio).
+// Tiny Web Audio synth. Autoplay is attempted on load; browsers that block it (Safari on iPhone)
+// leave the context suspended, so the home screen's speaker button finishes the job on first tap.
 let ctx = null;
 let master = null;
 let muted = typeof localStorage !== 'undefined' && localStorage.getItem('possessed:muted') === '1';
+let running = false;
+const listeners = new Set();
+
+export const getAudioRunning = () => running;
+export function subscribeAudio(fn) {
+  listeners.add(fn);
+  return () => { listeners.delete(fn); };
+}
+function setRunning(v) {
+  if (v === running) return;
+  running = v;
+  listeners.forEach((fn) => fn(v));
+}
+
+function ensureContext() {
+  if (ctx) return ctx;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  // iPhone: play as game audio even when the ring/silent switch is on (Safari 17+).
+  if (navigator.audioSession) navigator.audioSession.type = 'playback';
+  ctx = new AC();
+  master = ctx.createGain();
+  master.gain.value = muted ? 0 : 0.6;
+  master.connect(ctx.destination);
+  ctx.onstatechange = () => setRunning(ctx.state === 'running');
+  startWind();
+  startMusic(ctx, master);
+  return ctx;
+}
+
+// Starts sound without a gesture: allowed on most desktops and Android, blocked (left
+// suspended) on iPhone until unlockAudio runs inside a real tap.
+export function attemptAutoplay() {
+  const c = ensureContext();
+  if (!c) return;
+  if (c.state === 'running') { setRunning(true); return; }
+  Promise.resolve(c.resume()).then(() => setRunning(c.state === 'running')).catch(() => {});
+}
 
 // Must be called from a real activation gesture (click / touchend / pointerup / keydown);
 // phones do not count pointerdown on touch, so the audio would stay locked.
 export function unlockAudio() {
-  if (!ctx) {
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return;
-    // iPhone: play as game audio even when the ring/silent switch is on (Safari 17+).
-    if (navigator.audioSession) navigator.audioSession.type = 'playback';
-    ctx = new AC();
-    master = ctx.createGain();
-    master.gain.value = muted ? 0 : 0.6;
-    master.connect(ctx.destination);
-    startWind();
-    startMusic(ctx, master);
-  }
+  const c = ensureContext();
+  if (!c) return;
   // 'suspended' (autoplay lock) or 'interrupted' (iOS after a call or backgrounding).
-  if (ctx.state !== 'running') ctx.resume().catch(() => {});
+  if (c.state === 'running') setRunning(true);
+  else c.resume().then(() => setRunning(c.state === 'running')).catch(() => {});
 }
 
 // Very quiet looping wind under everything; goes through master, so mute silences it too.

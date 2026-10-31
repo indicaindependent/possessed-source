@@ -3,7 +3,7 @@ import NightSky from '@/components/possessed/house/NightSky';
 import HomeScreen from '@/components/possessed/screens/HomeScreen';
 import RoomScreen from '@/components/possessed/room/RoomScreen';
 import usePrefs from '@/lib/possessed/usePrefs';
-import { unlockAudio } from '@/lib/possessed/audio';
+import { attemptAutoplay, unlockAudio } from '@/lib/possessed/audio';
 import { generateCode } from '@/lib/possessed/roomCode';
 import { loadSession, saveSession, forgetConn } from '@/lib/possessed/session';
 import { ERROR_TEXT } from '@/lib/possessed/format';
@@ -17,6 +17,7 @@ export default function Game() {
   current.current = session;
 
   useEffect(() => {
+    attemptAutoplay(); // starts the music on load where the browser allows it
     // Only these events count as a user gesture for audio on phones (pointerdown on touch does not).
     const unlock = () => unlockAudio();
     const events = ['pointerup', 'touchend', 'click', 'keydown'];
@@ -60,6 +61,7 @@ export default function Game() {
           onFindNew={() => { exit(); setAutoSearch(true); }} />
       ) : (
         <HomeScreen
+          prefs={prefs}
           initialCode={initialCode}
           error={error}
           autoSearch={autoSearch}
