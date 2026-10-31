@@ -141,6 +141,34 @@
 .flicker { animation: flicker 2.6s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
 @keyframes flicker { 0%,100% { transform: scaleY(1); opacity: .95; } 40% { transform: scaleY(1.08); opacity: 1; } 70% { transform: scaleY(.94); opacity: .9; } }
 
+/* ---------- Quiet storybook details (transform/opacity only) ---------- */
+.night-star { opacity: .55; animation: star-twinkle 6s ease-in-out infinite; }
+.night-star-sparkle::before, .night-star-sparkle::after {
+  content: ''; position: absolute; left: 50%; top: 50%; border-radius: 50%;
+  background: hsl(var(--foreground) / .65); transform: translate(-50%, -50%);
+}
+.night-star-sparkle::before { width: 1px; height: 9px; }
+.night-star-sparkle::after { width: 9px; height: 1px; }
+@keyframes star-twinkle {
+  0%, 100% { opacity: .3; transform: scale(.8); }
+  45% { opacity: .55; transform: scale(1); }
+  55% { opacity: .9; transform: scale(1.2); }
+  70% { opacity: .45; transform: scale(.95); }
+}
+.pumpkin-aura { transform-box: fill-box; transform-origin: center; opacity: .7; animation: pumpkin-warmth 5.8s ease-in-out infinite; }
+.pumpkin-face { animation: pumpkin-light 5.8s ease-in-out infinite; }
+.pumpkin-smile { transform-box: fill-box; transform-origin: center; animation: pumpkin-grin 5.8s ease-in-out infinite; }
+.pumpkin-art:nth-of-type(2) .pumpkin-aura,
+.pumpkin-art:nth-of-type(2) .pumpkin-face,
+.pumpkin-art:nth-of-type(2) .pumpkin-smile { animation-delay: -2.4s; }
+@keyframes pumpkin-warmth { 0%, 100% { opacity: .45; transform: scale(.9); } 50% { opacity: .95; transform: scale(1.08); } }
+@keyframes pumpkin-light { 0%, 100% { opacity: .7; } 50% { opacity: 1; } }
+@keyframes pumpkin-grin { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.09, 1.15); } }
+/* Animate the artwork inside the still outer prop, never the clickable target or gameplay clues. */
+.ambient-house .idle-rocking_horse { animation: none; }
+.ambient-house .horse-rock { transform-box: view-box; transform-origin: 50px 92px; animation: horse-rock 4.8s ease-in-out infinite; }
+@keyframes horse-rock { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+
 /* ---------- Prop micro-animations ---------- */
 .pendulum { transform-box: view-box; transform-origin: 50px 56px; animation: swing 2s ease-in-out infinite; }
 @keyframes swing { 0%,100% { transform: rotate(9deg); } 50% { transform: rotate(-9deg); } }

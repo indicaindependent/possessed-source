@@ -33,7 +33,7 @@ export default function RoomView({ view, status, pending, act, fb, prefs, onLeav
         <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-2.5 px-1.5 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-1.5 sm:px-4 lg:min-h-0 lg:flex-row lg:items-center lg:gap-8 short:min-h-0 short:flex-row">
           <PhasePanel view={view} act={act} pending={pending} onLeave={onLeave} onNewHaunt={onNewHaunt} announce={fb.announce} quick={quick} onFindNew={onFindNew} />
           <div className="relative h-[300px] shrink-0 sm:h-[400px] lg:h-[min(640px,calc(100dvh-5rem))] lg:min-h-0 lg:flex-1 short:h-auto short:min-h-0 short:flex-1">
-            <HauntedHouse decorative className="h-full" propStates={propStates} celebrate={fb.celebrate} />
+            <HauntedHouse decorative ambient className="h-full" propStates={propStates} celebrate={fb.celebrate} />
             <CaughtFlourish stamp={fb.flourish} />
           </div>
         </div>

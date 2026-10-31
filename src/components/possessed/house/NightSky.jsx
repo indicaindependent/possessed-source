@@ -4,7 +4,7 @@ export default function NightSky() {
   return (
     <div className="night-sky pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
       {STARS.map(([x, y], i) => (
-        <span key={i} className="absolute rounded-full bg-parchment" style={{ left: `${x}%`, top: `${y}%`, width: i % 3 ? 2 : 3, height: i % 3 ? 2 : 3, opacity: 0.55 }} />
+        <span key={i} className={`night-star absolute rounded-full bg-foreground ${i % 3 === 0 ? 'night-star-sparkle' : ''}`} style={{ left: `${x}%`, top: `${y}%`, width: i % 3 ? 2 : 3, height: i % 3 ? 2 : 3, animationDelay: `${-i * 1.7}s`, animationDuration: `${5 + i % 4}s` }} />
       ))}
       <div className="moon-glow absolute hidden rounded-full bg-parchment lg:right-[6%] lg:top-[8%] lg:block lg:h-24 lg:w-24">
         <span className="absolute left-[22%] top-[30%] h-[32%] w-[32%] rounded-full bg-[#eadcbc]" />

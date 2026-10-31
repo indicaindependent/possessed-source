@@ -1,4 +1,5 @@
 import { startMusic } from '@/lib/possessed/music';
+import creak from '@/lib/possessed/creak';
 
 // Tiny Web Audio synth. Autoplay is attempted on load; browsers that block it (Safari on iPhone)
 // leave the context suspended, so the home screen's speaker button finishes the job on first tap.
@@ -82,6 +83,11 @@ function startWind() {
 export function setAudioMuted(m) {
   muted = m;
   if (master) master.gain.value = m ? 0 : 0.6;
+}
+
+// Decorative only: never unlocks audio or bypasses the player's sound preference.
+export function playAmbientCreak() {
+  if (ctx && !muted && ctx.state === 'running') return creak(ctx, master);
 }
 
 function tone(freq, { at = 0, dur = 0.3, type = 'sine', gain = 0.2, to = null, attack = 0.01 } = {}) {

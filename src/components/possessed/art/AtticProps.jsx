@@ -33,7 +33,7 @@ export function Mirror() {
 
 export function RockingHorse() {
   return (
-    <g>
+    <g className="horse-rock">
       <ellipse cx="50" cy="96" rx="36" ry="3" fill="#000" opacity=".3" />
       <path d="M8 82 Q50 101 92 82" fill="none" stroke="#9A5E35" strokeWidth="5" strokeLinecap="round" />
       <path d="M31 87 L35 62 M43 90 L42 63 M60 90 L60 63 M71 87 L67 62" stroke="#E7D3AE" strokeWidth="5" strokeLinecap="round" />

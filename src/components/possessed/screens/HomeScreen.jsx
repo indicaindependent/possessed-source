@@ -47,7 +47,7 @@ export default function HomeScreen({ initialCode = '', busy, error, onCreate, on
         <HowToPlay />
       </div>
       <div className="pointer-events-none relative z-0 h-[300px] w-full max-w-xl opacity-90 sm:h-[380px] lg:h-[560px] lg:max-w-none lg:flex-1 short:sticky short:top-3 short:h-[calc(100dvh-1.5rem)] short:flex-1" aria-hidden="true">
-        <HauntedHouse decorative className="h-full" />
+        <HauntedHouse decorative ambient className="h-full" />
       </div>
     </main>
   );
