@@ -5,10 +5,7 @@ const systemReduced = () => window.matchMedia?.('(prefers-reduced-motion: reduce
 
 export default function usePrefs() {
   const [muted, setMuted] = useState(() => localStorage.getItem('possessed:muted') === '1');
-  const [reducedMotion, setReduced] = useState(() => {
-    const saved = localStorage.getItem('possessed:motion');
-    return saved ? saved === 'reduced' : systemReduced();
-  });
+  const [reducedMotion, setReduced] = useState(systemReduced);
 
   useEffect(() => {
     setAudioMuted(muted);
@@ -16,8 +13,8 @@ export default function usePrefs() {
   }, [muted]);
 
   useEffect(() => {
+    localStorage.removeItem('possessed:motion');
     document.documentElement.classList.toggle('reduce-motion', reducedMotion);
-    localStorage.setItem('possessed:motion', reducedMotion ? 'reduced' : 'full');
   }, [reducedMotion]);
 
   return {

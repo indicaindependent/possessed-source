@@ -25,11 +25,11 @@ export default function HomeScreen({ initialCode = '', busy, error, onCreate, on
     <main className="relative mx-auto flex min-h-[100dvh] w-full max-w-6xl flex-col items-center gap-5 px-4 pb-8 pt-[max(env(safe-area-inset-top),1rem)] lg:flex-row lg:items-center lg:gap-12 lg:px-8 short:flex-row short:items-start short:gap-4 short:pb-4 short:pt-3">
       <div className="relative z-10 w-full max-w-md shrink-0 lg:w-[440px] short:w-[340px]">
         <header className="text-center lg:text-left short:text-left">
-          <h1 className="font-display text-4xl font-black tracking-tight text-parchment drop-shadow-[0_4px_20px_rgba(141,243,209,.25)] sm:text-6xl short:text-3xl">Possessed</h1>
-          <p className="font-display text-base font-bold italic text-spectral sm:text-lg short:text-sm">“One of these things is you.”</p>
+          <h1 className="title-emboss font-display text-[2.6rem] font-black leading-[1.02] tracking-[-0.02em] text-parchment sm:text-6xl short:text-3xl">Possessed</h1>
+          <p className="mt-0.5 font-body text-base font-extrabold italic tracking-[0.015em] text-spectral drop-shadow-[0_2px_10px_rgba(141,243,209,.25)] sm:text-lg short:text-sm">“One of these things is you.”</p>
           <LivePresence />
         </header>
-        <section className="fade-up mt-2 rounded-2xl border border-parchment/15 bg-ink/85 p-4 shadow-2xl backdrop-blur-md sm:p-5 short:mt-1 short:p-3">
+        <section className="panel-surface fade-up mt-2 rounded-2xl border border-parchment/20 bg-ink/88 p-4 backdrop-blur-md sm:p-5 short:mt-1 short:p-3">
           <JoinPanel
             name={name} onName={saveName} joining={joining} setJoining={setJoining}
             initialCode={initialCode} busy={busy} error={error}

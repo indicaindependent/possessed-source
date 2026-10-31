@@ -38,7 +38,7 @@ function PropButton({ id, interactive, disabled, label: showLabel = true, state 
         </span>
       </span>
       {showLabel && (
-        <span className="mt-0.5 max-w-full text-center text-[12px] font-extrabold leading-tight text-parchment drop-shadow-[0_1px_1px_rgba(0,0,0,.9)] sm:text-sm short:text-[12px]">
+        <span className="prop-label mt-0.5 max-w-full text-center text-[12px] font-extrabold leading-tight tracking-[0.01em] text-parchment sm:text-sm short:text-[12px]">
           {obj.name}
         </span>
       )}

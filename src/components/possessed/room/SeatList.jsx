@@ -13,11 +13,11 @@ export default function SeatList({ view, field, yes, no }) {
         else if (s) { icon = Hourglass; text = no; cls = 'text-parchment/75'; }
         const Icon = icon;
         return (
-          <li key={k} className="min-w-0 rounded-xl bg-plum/70 px-3 py-2">
-            <p className="truncate text-base font-extrabold text-parchment">
+          <li key={k} className="min-w-0 rounded-xl border border-parchment/10 bg-plum/75 px-3 py-2 shadow-sm">
+            <p className="truncate text-base font-extrabold tracking-[0.01em] text-parchment">
               {s ? s.name : 'Empty seat'}{k === view.you && <span className="font-medium text-parchment/60"> (you)</span>}
             </p>
-            <p className={`flex items-center gap-1 text-sm font-bold ${cls}`}>
+            <p className={`mt-0.5 flex items-center gap-1 text-[13px] font-bold tabular-nums ${cls}`}>
               <Icon className="h-4 w-4 shrink-0" aria-hidden="true" /> {text}
             </p>
           </li>

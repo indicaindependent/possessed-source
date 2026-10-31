@@ -11,7 +11,7 @@ export default function LobbyPanel({ view, act, pending }) {
   else if (friend.ready && !me.ready) hint = `${friend.name} is ready and waiting for you.`;
   return (
     <div className="space-y-3">
-      <h2 className="font-display text-2xl font-bold text-parchment">The haunt is open</h2>
+      <h2 className="title-emboss font-display text-2xl font-black tracking-tight text-parchment">The haunt is open</h2>
       <InviteBox code={view.code} />
       {view.notice === 'friend_left' && <p className="text-sm font-bold text-pumpkin">Your friend left. Invite someone new with the same code.</p>}
       <SeatList view={view} field="ready" yes="Ready" no="Not ready" />

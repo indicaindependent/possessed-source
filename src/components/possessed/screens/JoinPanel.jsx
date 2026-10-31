@@ -10,11 +10,11 @@ export default function JoinPanel({ name, onName, joining, setJoining, initialCo
   return (
     <div className="space-y-3">
       <label className="block">
-        <span className="text-sm font-extrabold text-parchment/80">Display name (optional)</span>
+        <span className="text-[13px] font-extrabold uppercase tracking-[0.06em] text-parchment/80">Display name (optional)</span>
         <input
           value={name} onChange={(e) => onName(e.target.value.slice(0, 16))} maxLength={16} placeholder="e.g. Mabel"
           autoFocus={isValidCode(normalizeCode(initialCode))}
-          className="mt-1 h-12 w-full rounded-xl border-2 border-parchment/20 bg-plum/60 px-4 text-base font-medium text-parchment placeholder:text-parchment/40 focus:border-pumpkin focus:outline-none"
+          className="mt-1 h-12 w-full rounded-xl border-2 border-parchment/20 bg-plum/70 px-4 text-base font-extrabold tracking-[0.01em] text-parchment shadow-inner placeholder:font-medium placeholder:text-parchment/40 focus:border-pumpkin focus:outline-none"
         />
       </label>
       {!joining ? (
@@ -22,14 +22,14 @@ export default function JoinPanel({ name, onName, joining, setJoining, initialCo
           {quick}
           {!searching && (
             <div>
-              <p className="mb-1.5 text-sm font-extrabold text-parchment/75">Play with a friend</p>
+              <p className="mb-1.5 text-[13px] font-extrabold uppercase tracking-[0.06em] text-parchment/75">Play with a friend</p>
               <div className="grid grid-cols-2 gap-2.5">
                 <button type="button" onClick={onCreate} disabled={busy}
-                  className="flex h-12 items-center justify-center gap-2 rounded-xl border-2 border-pumpkin px-2 font-display text-base font-bold text-pumpkin transition hover:bg-pumpkin/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-parchment disabled:opacity-60 sm:text-lg">
+                  className="flex h-12 items-center justify-center gap-2 rounded-xl border-2 border-pumpkin/90 bg-pumpkin/5 px-2 font-display text-base font-bold tracking-[0.01em] text-pumpkin transition hover:bg-pumpkin/15 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-parchment disabled:opacity-60 sm:text-lg">
                   {busy && <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />} Create a Haunt
                 </button>
                 <button type="button" onClick={() => setJoining(true)} disabled={busy}
-                  className="h-12 rounded-xl border-2 border-spectral px-2 font-display text-base font-bold text-spectral transition hover:bg-spectral/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-parchment sm:text-lg">
+                  className="h-12 rounded-xl border-2 border-spectral/90 bg-spectral/5 px-2 font-display text-base font-bold tracking-[0.01em] text-spectral transition hover:bg-spectral/15 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-parchment sm:text-lg">
                   Join a Friend
                 </button>
               </div>
@@ -39,11 +39,11 @@ export default function JoinPanel({ name, onName, joining, setJoining, initialCo
       ) : (
         <form onSubmit={submit} className="space-y-2.5">
           <label className="block">
-            <span className="text-sm font-extrabold text-parchment/80">Room code</span>
+            <span className="text-[13px] font-extrabold uppercase tracking-[0.06em] text-parchment/80">Room code</span>
             <input
               value={code} onChange={(e) => setCode(normalizeCode(e.target.value))} autoFocus={!isValidCode(normalizeCode(initialCode))} inputMode="text" autoCapitalize="characters" autoComplete="off"
               aria-invalid={code.length === 6 && !valid} placeholder="ABCDEF"
-              className="mt-1 h-14 w-full rounded-xl border-2 border-parchment/20 bg-plum/60 text-center font-mono text-2xl font-bold uppercase tracking-[0.4em] text-parchment placeholder:text-parchment/25 focus:border-spectral focus:outline-none"
+              className="mt-1 h-14 w-full rounded-xl border-2 border-parchment/20 bg-plum/70 text-center font-mono text-2xl font-bold uppercase tabular-nums tracking-[0.38em] text-parchment shadow-inner placeholder:text-parchment/25 focus:border-spectral focus:outline-none"
             />
           </label>
           <div className="grid grid-cols-[auto_1fr] gap-2.5">

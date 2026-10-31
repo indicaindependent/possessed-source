@@ -23,12 +23,12 @@ export default function GameHUD({ view, pulse }) {
   const finalSecond = final ? Math.ceil(d.remainingMs / 1000) : null;
   useEffect(() => { if (finalSecond) sfx.softTick(); }, [finalSecond]);
   return (
-    <div className="relative mx-1.5 mt-1.5 shrink-0 rounded-xl border border-parchment/10 bg-ink/85 px-2.5 py-1.5 backdrop-blur sm:mx-auto sm:w-full sm:max-w-5xl sm:px-3 sm:py-2 short:mt-1 short:py-1">
+    <div className="panel-surface relative mx-1.5 mt-1.5 shrink-0 rounded-xl border border-parchment/15 bg-ink/88 px-2.5 py-1.5 backdrop-blur sm:mx-auto sm:w-full sm:max-w-5xl sm:px-3 sm:py-2 short:mt-1 short:py-1">
       {pulse && <span key={pulse} className="heartbeat pointer-events-none absolute inset-0 rounded-xl" aria-hidden="true" />}
       <div className="flex items-center gap-2">
         <RoleChip role={view.role} />
-        <span className="shrink-0 text-sm font-bold text-parchment/75">R{view.round}/2</span>
-        <span className="flex min-w-0 items-center gap-1 text-[13px] font-bold text-parchment/85">
+        <span className="shrink-0 font-display text-sm font-bold tabular-nums tracking-tight text-parchment/80">R{view.round}/2</span>
+        <span className="flex min-w-0 items-center gap-1 text-[13px] font-bold tabular-nums text-parchment/85">
           <Eye className="h-4 w-4 shrink-0 text-pumpkin" aria-hidden="true" />
           <span className="truncate">{clueText(view, d)}</span>
         </span>

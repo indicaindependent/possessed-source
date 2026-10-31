@@ -10,7 +10,7 @@ export default function QuickMatch({ search, onInvite }) {
   return (
     <div className="space-y-2">
       <button type="button" onClick={searchMatch} disabled={busy}
-        className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-pumpkin px-4 font-display text-xl font-bold text-ink shadow-[0_6px_0_#b86f17] transition active:translate-y-1 active:shadow-[0_2px_0_#b86f17] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-parchment disabled:opacity-70">
+        className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-pumpkin px-4 font-display text-xl font-black tracking-[0.01em] text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_6px_0_#b86f17] transition active:translate-y-1 active:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_2px_0_#b86f17] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-parchment disabled:opacity-70">
         {busy ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /> : <Zap className="h-5 w-5" aria-hidden="true" />}
         {busy ? 'Joining the queue…' : 'Quick Match'}
       </button>
