@@ -5,7 +5,7 @@ import { secs } from '@/lib/possessed/format';
 export default function GhostMeter({ objectId, readyIn, cooldownMs }) {
   return (
     <div className="flex min-w-0 items-center gap-2">
-      <span className="min-w-0 text-sm font-extrabold leading-tight text-parchment"><span className="hidden sm:inline">Inside: </span>{objectName(objectId)}</span>
+      <span className="min-w-0 truncate text-sm font-extrabold leading-tight text-parchment"><span className="hidden sm:inline text-parchment/80">Inside: </span>{objectName(objectId)}</span>
       {readyIn > 0 ? (
         <span className="flex shrink-0 items-center gap-1.5 whitespace-nowrap text-[13px] font-bold text-parchment/80">
           <span className="h-2 w-10 overflow-hidden rounded-full bg-parchment/15" aria-hidden="true">

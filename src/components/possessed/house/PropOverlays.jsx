@@ -8,7 +8,7 @@ function Badge({ children, tone = 'parchment', k, extra = '' }) {
     ink: 'bg-ink text-parchment border border-parchment/40',
   };
   return (
-    <span key={k} className={`pop-in absolute left-1/2 top-0 z-20 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full px-2 py-0.5 text-[12px] font-extrabold uppercase tracking-wide shadow-lg sm:text-[13px] ${tones[tone]} ${extra}`}>
+    <span key={k} className={`pop-in absolute left-1/2 top-0 z-20 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full px-1.5 py-0.5 text-[10px] font-extrabold uppercase leading-none tracking-wide shadow-lg sm:px-2 sm:text-[12px] ${tones[tone]} ${extra}`}>
       {children}
     </span>
   );

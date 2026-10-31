@@ -6,9 +6,9 @@ export default function NightSky() {
       {STARS.map(([x, y], i) => (
         <span key={i} className="absolute rounded-full bg-parchment" style={{ left: `${x}%`, top: `${y}%`, width: i % 3 ? 2 : 3, height: i % 3 ? 2 : 3, opacity: 0.55 }} />
       ))}
-      <div className="moon-glow absolute right-[3%] top-[1.5%] h-12 w-12 rounded-full bg-parchment sm:right-[8%] sm:top-[6%] sm:h-20 sm:w-20 md:h-28 md:w-28">
-        <span className="absolute left-[22%] top-[30%] h-4 w-4 rounded-full bg-[#eadcbc]" />
-        <span className="absolute left-[55%] top-[55%] h-3 w-3 rounded-full bg-[#eadcbc]" />
+      <div className="moon-glow absolute hidden rounded-full bg-parchment lg:right-[6%] lg:top-[8%] lg:block lg:h-24 lg:w-24">
+        <span className="absolute left-[22%] top-[30%] h-[32%] w-[32%] rounded-full bg-[#eadcbc]" />
+        <span className="absolute left-[55%] top-[55%] h-[24%] w-[24%] rounded-full bg-[#eadcbc]" />
       </div>
       <svg className="absolute bottom-0 left-0 h-[22vh] w-full" viewBox="0 0 400 100" preserveAspectRatio="none">
         <path d="M0 70 Q60 40 120 62 T240 58 T400 50 V100 H0 Z" fill="#1d1630" />

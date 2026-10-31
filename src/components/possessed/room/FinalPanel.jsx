@@ -19,7 +19,7 @@ export default function FinalPanel({ view, act, pending, onLeave, onNewHaunt, qu
     <div className="space-y-3">
       <div className="flex items-center gap-3">
         <GhostFace mood={draw ? 'oops' : 'happy'} className="h-14 w-12 shrink-0" />
-        <h2 className="font-display text-3xl font-black text-parchment">
+        <h2 className="title-emboss font-display text-3xl font-black tracking-tight text-parchment">
           {draw ? "It's a draw!" : <><span className="text-pumpkin">{winnerName}</span> {winnerName === 'You' ? 'win!' : 'wins!'}</>}
         </h2>
       </div>

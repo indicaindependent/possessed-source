@@ -4,7 +4,7 @@ import IconToggle from '@/components/possessed/room/IconToggle';
 
 export default function TopBar({ code, status, prefs, onLeave }) {
   return (
-    <header className="flex shrink-0 items-center gap-2 px-2 pt-2 sm:gap-3 sm:px-4 short:pt-1">
+    <header className="mx-auto flex w-full max-w-6xl shrink-0 items-center gap-2 px-2 pt-2 sm:gap-3 sm:px-4 short:pt-1">
       <span className="title-emboss hidden font-display text-2xl font-black tracking-tight text-parchment sm:inline short:text-xl">Possessed</span>
       <span className="rounded-lg border border-pumpkin/25 bg-plum/90 px-2.5 py-1 font-mono text-base font-bold tracking-[0.2em] text-pumpkin shadow-inner" aria-label={`Room code ${code.split('').join(' ')}`}>
         {code}

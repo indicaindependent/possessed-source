@@ -11,9 +11,9 @@ export default function IntermissionPanel({ view, act, pending }) {
   const wasGhost = r.ghostSeat === view.you;
   return (
     <div className="space-y-3">
-      <h2 className="font-display text-2xl font-bold text-parchment">Round 1 complete</h2>
+      <h2 className="title-emboss font-display text-2xl font-black tracking-tight text-parchment">Round 1 complete</h2>
       <RoundResult r={r} you={view.you} />
-      <div className="flex items-start gap-3 rounded-xl border border-spectral/40 p-3">
+      <div className="flex items-start gap-3 rounded-xl border border-spectral/40 bg-spectral/5 p-3">
         <Repeat className="mt-0.5 h-5 w-5 shrink-0 text-spectral" aria-hidden="true" />
         <div>
           <p className="text-base font-extrabold text-parchment">Roles swap! You'll be the {wasGhost ? 'Hunter' : 'Ghost'} next.</p>

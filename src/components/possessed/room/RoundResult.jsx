@@ -7,7 +7,7 @@ export default function RoundResult({ r, you, digits = 2 }) {
   const caught = r.outcome === 'caught';
   const Icon = caught ? Search : Ghost;
   return (
-    <div className="flex items-start gap-3 rounded-xl bg-plum/60 p-3">
+    <div className="flex items-start gap-3 rounded-xl border border-parchment/10 bg-plum/70 p-3 shadow-sm">
       <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${caught ? 'text-pumpkin' : 'text-spectral'}`} aria-hidden="true" />
       <div className="min-w-0">
         <p className="text-base font-extrabold text-parchment">

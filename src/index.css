@@ -38,7 +38,51 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    /* Named palette roles */
+    --color-ink: #151221;
+    --color-plum: #30213F;
+    --color-pumpkin: #FFAD42;
+    --color-spectral: #8DF3D1;
+    --color-parchment: #FFF0D4;
+
+    /* Type scale (~1.22 ratio) & line-heights */
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.2rem;
+    --text-xl: 1.5rem;
+    --text-2xl: 1.875rem;
+    --text-3xl: 2.25rem;
+    --text-display: 2.75rem;
+    --leading-tight: 1.1;
+    --leading-snug: 1.3;
+    --leading-normal: 1.5;
+
+    /* Spacing scale (4/8 px grid) */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+
+    /* Radius tokens */
+    --radius-sm: 0.5rem;
+    --radius-md: 0.75rem;
     --radius: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.25rem;
+    --radius-pill: 9999px;
+
+    /* Elevation & tactile shadow tokens */
+    --shadow-card: inset 0 1px 0 rgba(255, 240, 212, 0.14), 0 18px 44px rgba(0, 0, 0, 0.62);
+    --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.35);
+    --shadow-cta-amber: inset 0 1px 0 rgba(255, 255, 255, 0.42), 0 5px 0 #b86f17, 0 8px 20px rgba(0, 0, 0, 0.4);
+    --shadow-cta-amber-active: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 1px 0 #b86f17;
+    --shadow-cta-mint: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 5px 0 #4fb894, 0 8px 20px rgba(0, 0, 0, 0.4);
+    --shadow-cta-mint-active: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 1px 0 #4fb894;
+
+    /* Font families */
     --font-heading: 'Recoleta', Georgia, 'Times New Roman', serif;
     --font-display: 'Recoleta', Georgia, 'Times New Roman', serif;
     --font-body: 'Avenir', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
@@ -53,11 +97,13 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     font-synthesis: none;
+    overflow-x: hidden;
   }
   body {
     @apply bg-background text-foreground font-body;
     -webkit-tap-highlight-color: transparent;
     font-feature-settings: "kern" 1, "liga" 1;
+    overflow-x: hidden;
   }
   h1, h2, h3, .font-display {
     font-kerning: normal;
@@ -70,7 +116,7 @@
   text-shadow: 0 2px 0 #1b1226, 0 4px 14px rgba(0, 0, 0, 0.55), 0 0 28px rgba(141, 243, 209, 0.22);
 }
 .panel-surface {
-  box-shadow: inset 0 1px 0 rgba(255, 240, 212, 0.14), 0 20px 50px rgba(0, 0, 0, 0.65);
+  box-shadow: var(--shadow-card);
 }
 .prop-label {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 0 8px rgba(21, 18, 33, 0.9);
