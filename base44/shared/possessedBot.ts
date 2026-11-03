@@ -15,7 +15,7 @@ function memory(s, rng) {
       roundId: s.roundId,
       stillUntil: between(rng, 14000, 22000),
       tauntAt: between(rng, 15000, 40000), taunted: false,
-      searched: [], clueIdx: -1, nextSearchAt: 10000, lastSearchAt: -1e9, blindDone: false, missNext: false,
+      searched: [], clueIdx: -1, nextSearchAt: 1e12, lastSearchAt: -1e9, missNext: false,
     };
   }
   return s.bot;
@@ -52,25 +52,18 @@ export function botHunterDecide(s, now, rng) {
   if (a < m.nextSearchAt || a - m.lastSearchAt < 8000) return null;
   settleCharges(s, a);
   if (s.charges <= 0) return null;
-  let pool;
-  if (s.lastClue) {
-    const { room: clueRoom, props = [] } = s.lastClue;
-    const room = clueRoom ? ROOMS[clueRoom].filter((id) => !props.includes(id)) : props;
-    const fresh = room.filter((id) => !m.searched.includes(id));
-    pool = fresh.length ? fresh : room;
-    if (m.missNext) {
-      m.missNext = false;
-      const wrong = pool.filter((id) => id !== s.ghostObject);
-      const anyWrong = room.filter((id) => id !== s.ghostObject);
-      pool = wrong.length ? wrong : anyWrong.length ? anyWrong : pool;
-    }
-    m.nextSearchAt = a + 8000;
-  } else {
-    if (m.blindDone) return null;
-    m.blindDone = true;
-    pool = OBJECT_IDS.filter((id) => !m.searched.includes(id));
-    m.nextSearchAt = 1e12; // JSON-safe "never" (until the first clue resets it)
+  if (!s.lastClue) return null; // never search blind: the first search waits for the first clue
+  const { room: clueRoom, props = [] } = s.lastClue;
+  const room = clueRoom ? ROOMS[clueRoom].filter((id) => !props.includes(id)) : props;
+  const fresh = room.filter((id) => !m.searched.includes(id));
+  let pool = fresh.length ? fresh : room;
+  if (m.missNext) {
+    m.missNext = false;
+    const wrong = pool.filter((id) => id !== s.ghostObject);
+    const anyWrong = room.filter((id) => id !== s.ghostObject);
+    pool = wrong.length ? wrong : anyWrong.length ? anyWrong : pool;
   }
+  m.nextSearchAt = a + 8000;
   const objectId = pick(rng, pool);
   m.searched.push(objectId);
   m.lastSearchAt = a;

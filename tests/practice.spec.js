@@ -54,7 +54,7 @@ test('bot ghost: waits 14s+, never moves in the last 6s, taunts exactly once', (
   }
 });
 
-test('bot hunter: no blind search before 10s, then only inside the latest clue room, one per 8s', () => {
+test('bot hunter: never searches before the first clue, first search 5-8s after it, then only inside the latest clue room, one per 8s', () => {
   for (let seed = 1; seed < 20; seed++) {
     const s0 = activeRound(0);
     const rng = seeded(seed);
@@ -67,7 +67,8 @@ test('bot hunter: no blind search before 10s, then only inside the latest clue r
       expect(ms - last).toBeGreaterThanOrEqual(8000);
       if (s0.lastClue?.room) expect(ROOM_OF[a.objectId]).toBe(s0.lastClue.room);
       else if (s0.lastClue) expect(s0.lastClue.props).toContain(a.objectId);
-      else expect(ms).toBeGreaterThanOrEqual(10000);
+      else throw new Error(`blind search at ${ms}ms`);
+      if (last < 0) { expect(ms).toBeGreaterThanOrEqual(B.clueTimesMs[0] + 5000); expect(ms).toBeLessThanOrEqual(B.clueTimesMs[0] + 8200); }
       last = ms;
       G.act(s0, 1, { ...a, actionId: `h${now}` }, now);
     }
@@ -79,6 +80,15 @@ test('bot hunter: a Ghost that never moves survives at least 20s (fixed seed)', 
   const { s, log } = run(botHunterDecide, 0, 5);
   expect(s.results[0].survivalMs).toBeGreaterThanOrEqual(20000);
   for (let i = 1; i < log.length; i++) expect(log[i][0] - log[i - 1][0]).toBeGreaterThanOrEqual(8000);
+});
+
+test('bot hunter: a Ghost that never moves is never caught before the first clue (any seed)', () => {
+  for (let seed = 1; seed <= 200; seed++) {
+    G.setRandom(seeded(seed));
+    const { s, log } = run(botHunterDecide, 0, seed);
+    expect(log[0][0]).toBeGreaterThanOrEqual(B.clueTimesMs[0]);
+    expect(s.results[0].survivalMs).toBeGreaterThanOrEqual(B.clueTimesMs[0]);
+  }
 });
 
 test('bot never acts outside the active phase', () => {
