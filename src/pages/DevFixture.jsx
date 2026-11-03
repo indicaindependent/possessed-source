@@ -4,6 +4,7 @@ import RoomView from '@/components/possessed/room/RoomView';
 import useFeedback from '@/lib/possessed/useFeedback';
 import usePrefs from '@/lib/possessed/usePrefs';
 import { fixtureView } from '@/lib/possessed/fixtures';
+import IntroOverlay from '@/components/possessed/intro/IntroOverlay';
 
 const noop = () => {};
 const fakeAct = () => ({ ok: true });
@@ -15,6 +16,7 @@ export default function DevFixture() {
   const view = useMemo(() => fixtureView(q.get('phase') || 'active', q.get('role') || 'hunter'), []);
   const fb = useFeedback();
   const prefs = usePrefs();
+  if (q.get('phase') === 'intro') return <IntroOverlay mode="full" onDone={noop} />;
   return (
     <div className="calm">
       <NightSky />
