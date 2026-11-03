@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
+import CopyFallback from '@/components/possessed/room/CopyFallback';
+import copyText from '@/lib/possessed/copyText';
 
 export default function InviteBox({ code }) {
   const [copied, setCopied] = useState(false);
   const link = `${window.location.origin}${window.location.pathname}?room=${code}`;
+  const [blocked, setBlocked] = useState(false);
   const copy = async () => {
-    await navigator.clipboard.writeText(link);
+    if (!(await copyText(link))) { setBlocked(true); return; }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -20,6 +23,7 @@ export default function InviteBox({ code }) {
         {copied ? <Check className="h-4 w-4" aria-hidden="true" /> : <Copy className="h-4 w-4" aria-hidden="true" />}
         <span aria-live="polite">{copied ? 'Link copied' : 'Copy invite link'}</span>
       </button>
+      {blocked && <div className="w-full"><CopyFallback text={link} /></div>}
     </div>
   );
 }

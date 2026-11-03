@@ -6,7 +6,8 @@ import PrimaryAction from '@/components/possessed/room/PrimaryAction';
 import { nextRoundGoal } from '@/lib/possessed/format';
 
 export default function IntermissionPanel({ view, act, pending }) {
-  const r = view.results[0];
+  const r = view.results?.[0];
+  if (!r) return null;
   const me = view.seats[view.you];
   const wasGhost = r.ghostSeat === view.you;
   return (
