@@ -139,6 +139,9 @@ export const sfx = {
   searched: play(() => noise({ dur: 0.2, from: 900, to: 500, gain: 0.06 })),
   go: play(() => { tone(784, { dur: 0.25, gain: 0.14 }); tone(1175, { at: 0.1, dur: 0.4, gain: 0.12 }); }),
   heartbeat: play(() => [[0, 0.4], [0.24, 0.32]].forEach(([at, gain]) => { tone(62, { at, dur: 0.18, gain, to: 45 }); tone(130, { at, dur: 0.14, gain: gain * 0.6, to: 90, type: 'triangle' }); })),
+  creak: play(() => tone(150, { dur: 0.7, to: 95, gain: 0.12, type: 'sawtooth' })),
+  breath: play(() => noise({ dur: 1.1, from: 700, to: 300, gain: 0.09 })),
+  giggle: play(() => [0, 0.12, 0.24, 0.36].forEach((at, i) => tone(1100 - i * 60, { at, dur: 0.09, gain: 0.07, to: 1250 - i * 60 }))),
   softTick: play(() => tone(1320, { dur: 0.06, gain: 0.035 })),
   tick: play(() => tone(660, { dur: 0.09, gain: 0.07, type: 'square' })),
 };

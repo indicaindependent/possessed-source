@@ -3,6 +3,13 @@ import { sfx } from '@/lib/possessed/audio';
 import { objectName, roomName, roomOfObject } from '@/lib/possessed/layout';
 import { REJECT_TEXT, secs } from '@/lib/possessed/format';
 
+const TAUNT_TEXT = {
+  creak: 'A floorboard creaks somewhere in the house...',
+  knock: 'Knock knock. The Ghost is mocking you.',
+  breath: 'A cold breath brushes past you...',
+  giggle: 'A ghostly giggle echoes through the halls!',
+};
+
 // Turns server events into short-lived visuals, sounds and a text equivalent for each.
 export default function useFeedback() {
   const [marks, setMarks] = useState({});
@@ -78,6 +85,8 @@ export default function useFeedback() {
         }
         break;
       }
+      case 'taunt': sfx[e.sound]?.(); say(TAUNT_TEXT[e.sound] || 'Something stirs in the house...'); break;
+      case 'taunted': sfx[e.sound]?.(); say('Your taunt echoes through the house.'); break;
       case 'rejected': if (REJECT_TEXT[e.reason]) say(REJECT_TEXT[e.reason]); break;
       case 'friend_joined': sfx.chime(); say('A friend has entered the house.'); break;
       case 'friend_disconnected': say('Your friend disconnected. Waiting to reconnect.'); break;

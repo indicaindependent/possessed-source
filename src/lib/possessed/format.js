@@ -22,6 +22,7 @@ export function nextRoundGoal(r, roundMs, nextIsGhost) {
 }
 
 export const REJECT_TEXT = {
+  taunt_cooldown: 'Your taunt is still recharging.',
   no_charges: 'No charges left. Wait for a refill.',
   cooldown: "Your next move isn't ready yet.",
   same_object: "You're already possessing that.",

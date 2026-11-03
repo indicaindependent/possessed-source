@@ -40,6 +40,7 @@ export function derive(view, now) {
     remainingMs: B.roundMs - activeMs,
     countdownMs: c.countdownMs != null ? Math.max(0, c.countdownMs - el) : null,
     ghostReadyIn: view.ghost ? Math.max(0, view.ghost.moveReadyInMs - run) : null,
+    tauntReadyIn: view.ghost ? Math.max(0, (view.ghost.tauntReadyInMs ?? 0) - run) : null,
     charges,
     refill,
     nextClueIn: view.nextClueAtMs != null ? Math.max(0, view.nextClueAtMs - activeMs) : null,

@@ -26,7 +26,7 @@ export default function RoomView({ view, status, pending, act, fb, prefs, onLeav
       {onFace && (view.phase === 'intermission' || view.phase === 'final' || view.phase === 'lobby') && (
         <div className="mx-1.5 mt-1.5 sm:mx-auto sm:w-full sm:max-w-md"><ArrivedOffer onFace={onFace} /></div>
       )}
-      {playing && <GameHUD view={view} pulse={fb.pulse} />}
+      {playing && <GameHUD view={view} pulse={fb.pulse} act={act} />}
       {playing ? (
         <div className="relative flex min-h-[300px] flex-1 px-1.5 pb-[max(env(safe-area-inset-bottom),0.375rem)] pt-1.5 sm:px-4 short:min-h-[230px]">
           <HauntedHouse className="h-full" interactive={live} propStates={propStates} clue={fb.clue} celebrate={fb.celebrate} onPick={onPick} />

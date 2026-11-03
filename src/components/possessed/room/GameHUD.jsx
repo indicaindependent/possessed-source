@@ -3,6 +3,7 @@ import { Eye } from 'lucide-react';
 import RoleChip from '@/components/possessed/room/RoleChip';
 import HunterMeter from '@/components/possessed/room/HunterMeter';
 import GhostMeter from '@/components/possessed/room/GhostMeter';
+import TauntBar from '@/components/possessed/room/TauntBar';
 import TimeBar from '@/components/possessed/room/TimeBar';
 import RoundTimer from '@/components/possessed/room/RoundTimer';
 import { useDerived } from '@/lib/possessed/clock';
@@ -16,7 +17,7 @@ function clueText(view, d) {
 }
 
 // The only component that ticks during play (10x/s); the house never re-renders for the clock.
-export default function GameHUD({ view, pulse }) {
+export default function GameHUD({ view, pulse, act }) {
   const B = view.balance;
   const d = useDerived(view, view.phase === 'active' && view.clock.running ? 100 : 0);
   const final = view.phase === 'active' && !view.clock.paused && d.remainingMs > 0 && d.remainingMs <= 10000;
@@ -43,6 +44,7 @@ export default function GameHUD({ view, pulse }) {
           <span className="ml-auto shrink-0 text-[13px] font-extrabold text-pumpkin">Last clue: {roomName(view.lastClue.room)}</span>
         )}
       </div>
+      {view.role === 'ghost' && view.phase === 'active' && act && <TauntBar view={view} act={act} readyIn={d.tauntReadyIn ?? 0} />}
     </div>
   );
 }
