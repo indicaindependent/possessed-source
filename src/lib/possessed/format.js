@@ -40,3 +40,18 @@ export const ERROR_TEXT = {
   seat_mismatch: 'That seat belongs to someone else.',
   code_taken: "Couldn't find a free room code. Please try again.",
 };
+
+// One sentence under the final survival bars. gap is already formatted (e.g. "12.3").
+export function finalLine({ draw, won, practice, gap }) {
+  if (draw) return practice ? 'You and the House lasted exactly as long.' : 'You both lasted exactly as long.';
+  if (practice) return won ? `You beat the House by ${gap} s.` : `The House got you by ${gap} s.`;
+  return won ? `You lasted ${gap} s longer.` : `They lasted ${gap} s longer.`;
+}
+
+// Share copy, correct for win / loss / draw and practice. Survival is always the sharer's own Ghost round.
+export function shareText({ draw, won, practice, mineMs, gap }) {
+  const t = String(Number((mineMs / 1000).toFixed(2)));
+  const foe = practice ? 'the House' : 'my rival';
+  const result = draw ? `tied with ${foe}` : won ? `beat ${foe} by ${gap} s` : `lost to ${foe} by ${gap} s`;
+  return `I hid for ${t} s as the Ghost in POSSESSED and ${result}. Can you find me? https://possessed.base44.app`;
+}

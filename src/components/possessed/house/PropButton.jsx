@@ -11,7 +11,7 @@ function PropButton({ id, interactive, disabled, label: showLabel = true, state 
   const Art = PROP_ART[id];
   const obj = OBJECTS[id];
   const { boxRef, artRef, style } = useArtFrame();
-  const label = `${obj.name}, ${roomName(obj.room)}${state.possessed ? ' (you are possessing this)' : ''}`;
+  const label = `${obj.name}, ${roomName(obj.room)}${state.possessed ? ' (you are possessing this)' : ''}${state.remembered ? ' (searched)' : ''}`;
 
   return (
     <button
@@ -24,11 +24,11 @@ function PropButton({ id, interactive, disabled, label: showLabel = true, state 
       onClick={() => interactive && !disabled && onPick?.(id)}
       className={`prop-btn relative flex h-full ${showLabel ? 'min-h-[44px] min-w-[44px]' : 'min-w-0'} flex-1 basis-0 flex-col items-center justify-end rounded-xl px-0.5 pb-1 outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-pumpkin ${
         interactive && !disabled ? 'cursor-pointer' : 'cursor-default'
-      } ${state.pending ? 'bg-parchment/10' : ''}`}
+      } ${state.pending ? 'bg-parchment/10' : ''} ${state.remembered && !state.pending ? 'opacity-55 saturate-50' : ''}`}
     >
       <span ref={boxRef} className="relative w-full min-h-0 flex-1">
         <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMax meet" className={`prop-art absolute inset-0 h-full w-full ${state.possessed ? 'possessed-art' : ''} ${state.ripple ? 'rippling-art' : ''}`}>
-          <g className={state.empty ? 'knock' : undefined}>
+          <g className={state.empty ? 'knock' : state.caught ? 'prop-open' : undefined}>
             <g ref={artRef} className={`idle idle-${id}`}><Art /></g>
           </g>
         </svg>

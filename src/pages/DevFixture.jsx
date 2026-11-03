@@ -12,7 +12,7 @@ const fakeAct = () => ({ ok: true });
 // /dev/fixture?phase=lobby|countdown|active|intermission|final&role=hunter|ghost&probe=1
 export default function DevFixture() {
   const q = new URLSearchParams(window.location.search);
-  const view = useMemo(() => fixtureView(q.get('phase') || 'active', q.get('role') || 'hunter'), []); // eslint-disable-line react-hooks/exhaustive-deps
+  const view = useMemo(() => fixtureView(q.get('phase') || 'active', q.get('role') || 'hunter'), []);
   const fb = useFeedback();
   const prefs = usePrefs();
   return (

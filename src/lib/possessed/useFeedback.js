@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { sfx } from '@/lib/possessed/audio';
+import { musicTail } from '@/lib/possessed/music';
 import { objectName, roomName, roomOfObject } from '@/lib/possessed/layout';
 import { REJECT_TEXT, secs } from '@/lib/possessed/format';
 
@@ -18,6 +19,10 @@ export default function useFeedback() {
   const [announce, setAnnounce] = useState({ text: '', id: 0 });
   const [pulse, setPulse] = useState(null);
   const [flourish, setFlourish] = useState(null);
+  // Hunter's searched props for the current roundId only ("searched", never "empty": the ghost may move in later).
+  const [go, setGo] = useState(null);
+  const [shake, setShake] = useState(null);
+  const [memory, setMemory] = useState({ roundId: null, ids: {} });
   const timers = useRef(new Set());
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
@@ -26,7 +31,12 @@ export default function useFeedback() {
     const t = setTimeout(() => { timers.current.delete(t); fn(); }, ms);
     timers.current.add(t);
   }, []);
-  const say = useCallback((text) => setAnnounce((a) => ({ text, id: a.id + 1 })), []);
+  // Clears after 3.2 s, matching the pill animation, so stale text never lingers.
+  const say = useCallback((text) => {
+    let id;
+    setAnnounce((a) => { id = a.id + 1; return { text, id }; });
+    later(() => setAnnounce((a) => (a.id === id ? { ...a, text: '' } : a)), 3200);
+  }, [later]);
   const flash = useCallback((id, kind, ms) => {
     const stamp = `${Date.now()}-${Math.random()}`;
     setMarks((m) => ({ ...m, [id]: { ...m[id], [kind]: stamp } }));
@@ -41,7 +51,8 @@ export default function useFeedback() {
   const handle = useCallback((e, ctx) => {
     const n = objectName(e.objectId);
     switch (e.kind) {
-      case 'empty': flash(e.objectId, 'empty', 1100); sfx.knock(); say(`Empty. Nothing in the ${n}.`); break;
+      case 'empty': flash(e.objectId, 'empty', 1100);
+        setMemory((m) => (m.roundId === ctx.roundId ? { ...m, ids: { ...m.ids, [e.objectId]: true } } : { roundId: ctx.roundId, ids: { [e.objectId]: true } })); sfx.knock(); say(`Empty. Nothing in the ${n}.`); break;
       case 'searched': {
         flash(e.objectId, 'searched', 1100);
         sfx.searched();
@@ -64,24 +75,35 @@ export default function useFeedback() {
         say(`Clue: the Ghost is in the ${roomName(e.room)}!`);
         break;
       }
-      case 'round_setup': setMarks({}); setClue(null); say(`Round ${e.round} is about to begin.`); break;
-      case 'go': sfx.go(); say(ctx.role === 'ghost' ? 'Go! Stay hidden.' : 'Go! Find the Ghost.'); break;
+      case 'round_setup': setMarks({}); setMemory({ roundId: null, ids: {} }); setClue(null); say(`Round ${e.round} is about to begin.`); break;
+      case 'go': {
+        const stamp = Date.now();
+        setGo(stamp);
+        later(() => setGo((g) => (g === stamp ? null : g)), 700);
+      }
+        sfx.go(); say(ctx.role === 'ghost' ? 'Go! Stay hidden.' : 'Go! Find the Ghost.'); break;
       case 'round_end': {
         const r = e.result;
         const where = objectName(r.hidingObject);
         const mine = r.ghostSeat === ctx.you;
+        musicTail();
         if (r.outcome === 'caught') {
-          sfx.caught();
+          // 250 ms hit-stop: silence, then the stamp, shake and sound land together.
           const stamp = Date.now();
-          setFlourish(stamp);
-          later(() => setFlourish((f) => (f === stamp ? null : f)), 1800);
+          later(() => {
+            sfx.caught();
+            setFlourish({ stamp, ms: r.survivalMs });
+            setShake(stamp);
+          }, 250);
+          later(() => setShake((s) => (s === stamp ? null : s)), 750);
+          later(() => setFlourish((f) => (f?.stamp === stamp ? null : f)), 2300);
           say(mine ? `Caught in the ${where} after ${secs(r.survivalMs, 2)}s!` : `You caught ${r.ghostName} in the ${where} at ${secs(r.survivalMs, 2)}s!`);
         } else {
           sfx.survived();
           const stamp = Date.now();
           setCelebrate(stamp);
           later(() => setCelebrate((c) => (c === stamp ? null : c)), 3400);
-          say(mine ? `You survived all 60 seconds in the ${where}!` : `${r.ghostName} survived the whole round in the ${where}.`);
+          say(mine ? `You survived all ${Math.round((ctx.roundMs ?? 60000) / 1000)} seconds in the ${where}!` : `${r.ghostName} survived the whole round in the ${where}.`);
         }
         break;
       }
@@ -98,5 +120,5 @@ export default function useFeedback() {
     }
   }, [flash, later, say]);
 
-  return { marks, clue, celebrate, announce, pulse, flourish, handle, say };
+  return { go, shake, memory, marks, clue, celebrate, announce, pulse, flourish, handle, say };
 }

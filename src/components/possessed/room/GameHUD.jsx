@@ -3,11 +3,13 @@ import { Eye } from 'lucide-react';
 import RoleChip from '@/components/possessed/room/RoleChip';
 import HunterMeter from '@/components/possessed/room/HunterMeter';
 import GhostMeter from '@/components/possessed/room/GhostMeter';
+import RoundTarget from '@/components/possessed/room/RoundTarget';
 import TauntBar from '@/components/possessed/room/TauntBar';
 import TimeBar from '@/components/possessed/room/TimeBar';
 import RoundTimer from '@/components/possessed/room/RoundTimer';
 import { useDerived } from '@/lib/possessed/clock';
 import { sfx } from '@/lib/possessed/audio';
+import { musicFinalTick } from '@/lib/possessed/music';
 import { roomName } from '@/lib/possessed/layout';
 
 function clueText(view, d) {
@@ -22,7 +24,8 @@ export default function GameHUD({ view, pulse, act }) {
   const d = useDerived(view, view.phase === 'active' && view.clock.running ? 100 : 0);
   const final = view.phase === 'active' && !view.clock.paused && d.remainingMs > 0 && d.remainingMs <= 10000;
   const finalSecond = final ? Math.ceil(d.remainingMs / 1000) : null;
-  useEffect(() => { if (finalSecond) sfx.softTick(); }, [finalSecond]);
+  useEffect(() => { if (finalSecond) sfx.softTick(); musicFinalTick(finalSecond); }, [finalSecond]);
+  useEffect(() => () => musicFinalTick(null), []);
   return (
     <div className="panel-surface relative mx-1.5 mt-1.5 shrink-0 rounded-xl border border-parchment/15 bg-ink/88 px-2.5 py-1.5 backdrop-blur sm:mx-auto sm:w-full sm:max-w-5xl sm:px-3 sm:py-2 short:mt-1 short:py-1">
       {pulse && <span key={pulse} className="heartbeat pointer-events-none absolute inset-0 rounded-xl" aria-hidden="true" />}
@@ -40,8 +43,9 @@ export default function GameHUD({ view, pulse, act }) {
         {view.role === 'ghost'
           ? <GhostMeter objectId={view.ghost?.objectId} readyIn={d.ghostReadyIn} cooldownMs={B.moveCooldownMs} />
           : <HunterMeter charges={d.charges ?? 0} max={B.maxCharges} refill={d.refill} regenMs={B.chargeRegenMs} />}
+        <RoundTarget view={view} activeMs={d.activeMs} />
         {view.lastClue && (
-          <span className="ml-auto shrink-0 text-[13px] font-extrabold text-pumpkin">Last clue: {roomName(view.lastClue.room)}</span>
+          <span className="ml-auto shrink-0 text-[13px] font-extrabold text-pumpkin">{view.role === 'ghost' ? 'Hunter was told' : 'Last clue'}: {roomName(view.lastClue.room)}</span>
         )}
       </div>
       {view.role === 'ghost' && view.phase === 'active' && act && <TauntBar view={view} act={act} readyIn={d.tauntReadyIn ?? 0} />}

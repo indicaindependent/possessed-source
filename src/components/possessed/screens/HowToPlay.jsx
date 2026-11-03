@@ -1,8 +1,10 @@
-import { Ghost, Search, Repeat } from 'lucide-react';
+import { Ghost, Search, Repeat, Zap, Timer } from 'lucide-react';
 
 const RULES = [
   { icon: Ghost, text: 'Ghost: hide in the furniture.' },
   { icon: Search, text: 'Hunter: search before time runs out.' },
+  { icon: Zap, text: 'Hunter: 3 search charges, one refills every 5 s.' },
+  { icon: Timer, text: 'Ghost: move every 8 s, but moving leaves a ripple.' },
   { icon: Repeat, text: 'Swap roles. Longer survival wins.' },
 ];
 

@@ -211,6 +211,15 @@
 @keyframes stamp { from { transform: scale(2.2) rotate(-8deg); opacity: 0; } to { transform: scale(1) rotate(-4deg); opacity: 1; } }
 .caught-stamp { transform: rotate(-4deg); }
 
+.go-beat { animation: go-beat .7s ease-out forwards; }
+@keyframes go-beat { 0% { opacity: 0; transform: scale(1.15); } 12%, 57% { opacity: 1; transform: scale(1); } 100% { opacity: 0; } }
+.house-shake { animation: house-shake .45s ease-in-out; }
+@keyframes house-shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 45% { transform: translateX(5px); } 70% { transform: translateX(-3px); } }
+.slide-in { animation: slide-in .4s .2s ease-out both; }
+@keyframes slide-in { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.prop-open { transform-box: fill-box; transform-origin: 50% 100%; animation: prop-open .5s ease-out forwards; }
+@keyframes prop-open { to { transform: scaleY(.9) translateY(4%); opacity: .55; } }
+
 /* ---------- Idle ambience (one small loop per prop) ---------- */
 .idle { transform-box: fill-box; transform-origin: 50% 100%; }
 .idle-rocking_chair { animation: sway 3.6s ease-in-out infinite; }

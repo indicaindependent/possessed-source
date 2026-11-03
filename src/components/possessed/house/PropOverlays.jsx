@@ -46,6 +46,7 @@ export default function PropOverlays({ state }) {
       {state.caught && <Badge tone="amber">Caught!</Badge>}
       {state.survivedHere && <Badge tone="mint" extra="short:hidden">Hid here</Badge>}
       {state.empty && <Badge k={state.empty} tone="parchment">Empty</Badge>}
+      {state.remembered && !state.empty && !state.pending && <Badge tone="ink" extra="opacity-80">Searched</Badge>}
       {state.searched && !state.possessed && <Badge k={state.searched} tone="ink">Searched</Badge>}
       {state.ripple && !state.possessed && !state.empty && <Badge k={state.ripple} tone="mint">Ripple</Badge>}
     </>

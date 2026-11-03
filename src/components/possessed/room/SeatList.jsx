@@ -15,7 +15,9 @@ export default function SeatList({ view, field, yes, no }) {
         return (
           <li key={k} className="min-w-0 rounded-xl border border-parchment/10 bg-plum/75 px-3 py-2 shadow-sm">
             <p className="truncate text-base font-extrabold tracking-[0.01em] text-parchment">
-              {s ? s.name : 'Empty seat'}{k === view.you && <span className="font-medium text-parchment/60"> (you)</span>}
+              {view.practice && k !== view.you
+                ? <span className="rounded-full bg-pumpkin px-2 py-0.5 text-sm text-ink">The House</span>
+                : (s ? s.name : 'Empty seat')}{k === view.you && <span className="font-medium text-parchment/60"> (you)</span>}
             </p>
             <p className={`mt-0.5 flex items-center gap-1 text-[13px] font-bold tabular-nums ${cls}`}>
               <Icon className="h-4 w-4 shrink-0" aria-hidden="true" /> {text}

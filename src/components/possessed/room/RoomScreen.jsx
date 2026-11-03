@@ -16,7 +16,7 @@ export default function RoomScreen({ session, prefs, onFatal, onSeated, onExit, 
     onEvent: (e) => fb.handle(e, ctx.current), onFatal, onSeated,
     onSettled: (done) => { if (SETTLE_TEXT[done.outcome]) fb.say(SETTLE_TEXT[done.outcome]); },
   });
-  ctx.current = { you: view?.you, role: view?.role, ghostObject: view?.ghost?.objectId };
+  ctx.current = { you: view?.you, role: view?.role, ghostObject: view?.ghost?.objectId, roundId: view?.roundId, roundMs: view?.balance?.roundMs };
 
   useEffect(() => {
     window.history.replaceState(null, '', `${window.location.pathname}?room=${session.code}`);
@@ -26,7 +26,7 @@ export default function RoomScreen({ session, prefs, onFatal, onSeated, onExit, 
   const doNewHaunt = () => { leave(); setTimeout(onNewHaunt, 150); };
   const doFindNew = () => { leave(); setTimeout(onFindNew, 150); };
   const doFace = () => { leave(); setTimeout(onFaceArrived, 150); };
-  if (!view) return <Connecting code={session.code} onCancel={() => onExit()} />;
+  if (!view) return <Connecting code={session.code} onCancel={() => onExit()} onRetry={() => window.location.reload()} />;
   return <RoomView view={view} status={status} pending={pending} act={act} fb={fb} prefs={prefs} onLeave={doLeave} onNewHaunt={doNewHaunt}
     quick={!!session.quick || !!view.practice} onFindNew={doFindNew} onFace={arrived ? doFace : null} />;
 }

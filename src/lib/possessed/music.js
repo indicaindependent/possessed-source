@@ -77,9 +77,46 @@ export function startMusic(ctx, master) {
     if (next < ctx.currentTime) next = ctx.currentTime + 0.05; // resumed after an interruption
     while (next < ctx.currentTime + 0.6) {
       playBar(ctx, bus, BARS[bar], next);
+      if (state.intense) intensityLayer(ctx, bus, next);
       next += 3 * BEAT;
       bar = (bar + 1) % BARS.length;
     }
   }, 200);
-  globalThis.__possessedMusic = { timer, ctx };
+  const state = { timer, ctx, bus, intense: false };
+  globalThis.__possessedMusic = state;
+}
+
+// Final-10s layer: a ticking low pulse on every half beat under the waltz.
+function intensityLayer(ctx, out, t) {
+  for (let i = 0; i < 6; i++) {
+    voice(ctx, out, 73.4, t + i * BEAT / 2, { type: 'triangle', gain: i % 2 ? 0.06 : 0.12, attack: 0.01, decay: 0.22 });
+  }
+}
+
+const live = () => { const m = globalThis.__possessedMusic; return m && m.ctx.state === 'running' ? m : null; };
+
+// Called with the same whole-second tick as sfx.softTick (10..1 in the final stretch, null otherwise).
+export function musicFinalTick(second) {
+  const m = globalThis.__possessedMusic;
+  if (!m) return;
+  m.intense = second != null && second <= 10;
+  if (second != null && second <= 3 && live()) {
+    const t = m.ctx.currentTime;
+    const g = 0.18 + (3 - second) * 0.08; // swells toward zero
+    voice(m.ctx, m.bus, 55, t, { type: 'sine', gain: g, attack: 0.03, decay: 0.3 });
+    voice(m.ctx, m.bus, 50, t + 0.24, { type: 'sine', gain: g * 0.8, attack: 0.03, decay: 0.3 });
+  }
+}
+
+// Caught/round end: cut the music tail, then fade the waltz back in.
+export function musicTail() {
+  const m = live();
+  if (!m) return;
+  m.intense = false;
+  const t = m.ctx.currentTime;
+  m.bus.gain.cancelScheduledValues(t);
+  m.bus.gain.setValueAtTime(m.bus.gain.value || 0.0001, t);
+  m.bus.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
+  m.bus.gain.setValueAtTime(0.0001, t + 2.5);
+  m.bus.gain.exponentialRampToValueAtTime(0.55, t + 5);
 }

@@ -4,12 +4,10 @@ import BigButton from '@/components/possessed/room/BigButton';
 import CopyFallback from '@/components/possessed/room/CopyFallback';
 import copyText from '@/lib/possessed/copyText';
 
-const trim = (ms) => String(Number((ms / 1000).toFixed(2)));
-
-export default function ShareResult({ survivalMs }) {
+// Copies the result; if the clipboard is blocked, shows the text in a selectable field.
+export default function ShareResult({ text }) {
   const [copied, setCopied] = useState(false);
   const [blocked, setBlocked] = useState(false);
-  const text = `I survived ${trim(survivalMs)} s as the Ghost in POSSESSED. Think you can find me? possessed.base44.app`;
   const copy = async () => {
     if (!(await copyText(text))) { setBlocked(true); return; }
     setCopied(true);

@@ -6,7 +6,7 @@ import GhostFace from '@/components/possessed/art/GhostFace';
 import SurvivalCard from '@/components/possessed/room/SurvivalCard';
 import ShareResult from '@/components/possessed/room/ShareResult';
 import SurvivalBars from '@/components/possessed/room/SurvivalBars';
-import { precisionFor, secs } from '@/lib/possessed/format';
+import { precisionFor, secs, finalLine, shareText } from '@/lib/possessed/format';
 
 export default function FinalPanel({ view, act, pending, onLeave, onNewHaunt, quick = false, onFindNew }) {
   if (!view.results || view.results.length < 2) return null; // results not in yet: never crash the screen
@@ -17,6 +17,8 @@ export default function FinalPanel({ view, act, pending, onLeave, onNewHaunt, qu
   const winnerName = draw ? null : (view.winner === view.you ? 'You' : view.seats[view.winner]?.name ?? 'Your friend');
   const mine = view.results.find((r) => r.ghostSeat === view.you);
   const theirs = view.results.find((r) => r.ghostSeat !== view.you);
+  const won = !draw && view.winner === view.you;
+  const gap = secs(Math.abs((mine?.survivalMs ?? 0) - (theirs?.survivalMs ?? 0)), digits);
   const nameOf = (r) => (r.ghostSeat === view.you ? 'You' : r.ghostName);
   return (
     <div className="space-y-3">
@@ -33,12 +35,7 @@ export default function FinalPanel({ view, act, pending, onLeave, onNewHaunt, qu
       </div>
       <SurvivalBars roundMs={view.balance.roundMs} digits={digits}
         rows={[r1, r2].map((r) => ({ name: nameOf(r), ms: r.survivalMs, winner: !draw && r.ghostSeat === view.winner }))} />
-      <p className="text-sm font-bold text-parchment/85">
-        {view.practice && mine && theirs
-          ? (draw ? 'You and the House survived exactly as long. A draw.'
-            : `${view.winner === view.you ? 'You beat' : 'The House beat you'} by ${secs(Math.abs(mine.survivalMs - theirs.survivalMs), digits)} s. Ready for a real player? Try Quick Match.`)
-          : `${nameOf(r1)} survived ${secs(r1.survivalMs, digits)} s, ${nameOf(r2)} survived ${secs(r2.survivalMs, digits)} s.`}
-      </p>
+      <p className="text-sm font-bold text-parchment/85">{finalLine({ draw, won, practice: view.practice, gap })}</p>
       <SeatList view={view} field="rematch" yes="Wants a rematch" no="Deciding" />
       <PrimaryAction>
         <BigButton pressed={me.rematch} busy={pending?.type === 'rematch'} tone={me.rematch ? 'mint' : 'amber'} onClick={() => act('rematch', { value: !me.rematch })}>
@@ -46,7 +43,7 @@ export default function FinalPanel({ view, act, pending, onLeave, onNewHaunt, qu
         </BigButton>
       </PrimaryAction>
       <div className="grid grid-cols-3 gap-2">
-        <ShareResult survivalMs={mine?.survivalMs ?? 0} />
+        <ShareResult text={shareText({ draw, won, practice: view.practice, mineMs: mine?.survivalMs ?? 0, gap })} />
         {quick
           ? <BigButton compact tone="ghost" onClick={onFindNew}><Search className="h-5 w-5" aria-hidden="true" />Find new opponent</BigButton>
           : <BigButton compact tone="ghost" onClick={onNewHaunt}><Plus className="h-5 w-5" aria-hidden="true" />New haunt</BigButton>}

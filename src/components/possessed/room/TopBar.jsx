@@ -1,8 +1,9 @@
-import { LogOut, Volume2, VolumeX } from 'lucide-react';
+import { Volume2, VolumeX } from 'lucide-react';
 import ConnectionBadge from '@/components/possessed/room/ConnectionBadge';
 import IconToggle from '@/components/possessed/room/IconToggle';
+import LeaveButton from '@/components/possessed/room/LeaveButton';
 
-export default function TopBar({ code, status, prefs, onLeave }) {
+export default function TopBar({ code, status, prefs, onLeave, confirmLeave = false }) {
   return (
     <header className="mx-auto flex w-full max-w-6xl shrink-0 items-center gap-2 px-2 pt-2 sm:gap-3 sm:px-4 short:pt-1">
       <span className="title-emboss hidden font-display text-2xl font-black tracking-tight text-parchment sm:inline short:text-xl">Possessed</span>
@@ -12,7 +13,7 @@ export default function TopBar({ code, status, prefs, onLeave }) {
       <ConnectionBadge status={status} />
       <div className="ml-auto flex items-center gap-1.5">
         <IconToggle icon={prefs.muted ? VolumeX : Volume2} label={prefs.muted ? 'Sound is off. Turn sound on' : 'Sound is on. Mute'} pressed={!prefs.muted} onClick={prefs.toggleMute} />
-        <IconToggle icon={LogOut} label="Leave haunt" onClick={onLeave} />
+        <LeaveButton confirm={confirmLeave} onLeave={onLeave} />
       </div>
     </header>
   );

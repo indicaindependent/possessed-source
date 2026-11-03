@@ -12,7 +12,7 @@ export default function BigButton({ children, onClick, pressed, tone = 'amber', 
     <button
       type="button"
       onClick={busy ? undefined : onClick}
-      disabled={disabled}
+      disabled={disabled || busy}
       aria-pressed={pressed}
       aria-busy={busy || undefined}
       className={`flex h-14 w-full items-center justify-center rounded-xl font-display font-black tracking-[0.01em] transition active:translate-y-1 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-parchment disabled:opacity-50 ${busy ? 'opacity-80' : ''} ${size} ${tones[tone]}`}
