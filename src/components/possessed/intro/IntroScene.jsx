@@ -29,7 +29,7 @@ export default function IntroScene() {
         <ellipse cx="162" cy="262" rx="3" ry="4" />
       </g>
       <rect x="0" y="400" width="400" height="14" fill="#1b1226" />
-      <rect className="intro-fog" x="-200" y="384" width="800" height="36" rx="18" fill="#FFF0D4" opacity="0.08" />
+      <rect className="intro-fog" x="-20" y="384" width="440" height="36" rx="18" fill="#FFF0D4" opacity="0.08" />
     </svg>
   );
 }
