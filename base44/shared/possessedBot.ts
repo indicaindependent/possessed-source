@@ -1,6 +1,7 @@
 // "The House": a server-side practice opponent. No I/O; the caller feeds G.act with the result.
 // Planning memory lives in s.bot (serialized with the room) and resets every round.
-// The hunter policy reads only what a human hunter's view shows (lastClue, charges), never ghostObject.
+// The hunter policy aims only from what a human hunter's view shows (lastClue, charges). It reads
+// ghostObject for one thing only: to deliberately miss (an easing handicap for new players).
 import { BALANCE as B, OBJECT_IDS, ROOMS, ROOM_OF, TAUNTS } from './possessedConfig.ts';
 import { activeNow, settleCharges, hunterSeat } from './possessedEngine.ts';
 
@@ -14,7 +15,7 @@ function memory(s, rng) {
       roundId: s.roundId,
       stillUntil: between(rng, 14000, 22000),
       tauntAt: between(rng, 15000, 40000), taunted: false,
-      searched: [], clueIdx: -1, nextSearchAt: 7000, lastSearchAt: -1e9, blindDone: false,
+      searched: [], clueIdx: -1, nextSearchAt: 10000, lastSearchAt: -1e9, blindDone: false, missNext: false,
     };
   }
   return s.bot;
@@ -45,17 +46,25 @@ export function botHunterDecide(s, now, rng) {
   const a = activeNow(s, now);
   if (s.lastClue && s.lastClue.index !== m.clueIdx) {
     m.clueIdx = s.lastClue.index;
-    m.nextSearchAt = a + between(rng, 2000, 4000);
+    m.nextSearchAt = a + between(rng, 5000, 8000);
+    m.missNext = rng() < 0.4;
   }
-  if (a < m.nextSearchAt || a - m.lastSearchAt < 6000) return null;
+  if (a < m.nextSearchAt || a - m.lastSearchAt < 8000) return null;
   settleCharges(s, a);
   if (s.charges <= 0) return null;
   let pool;
   if (s.lastClue) {
-    const room = ROOMS[s.lastClue.room];
+    const { room: clueRoom, props = [] } = s.lastClue;
+    const room = clueRoom ? ROOMS[clueRoom].filter((id) => !props.includes(id)) : props;
     const fresh = room.filter((id) => !m.searched.includes(id));
     pool = fresh.length ? fresh : room;
-    m.nextSearchAt = a + 6000;
+    if (m.missNext) {
+      m.missNext = false;
+      const wrong = pool.filter((id) => id !== s.ghostObject);
+      const anyWrong = room.filter((id) => id !== s.ghostObject);
+      pool = wrong.length ? wrong : anyWrong.length ? anyWrong : pool;
+    }
+    m.nextSearchAt = a + 8000;
   } else {
     if (m.blindDone) return null;
     m.blindDone = true;

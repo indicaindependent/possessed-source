@@ -17,8 +17,8 @@ function Badge({ children, tone = 'parchment', k, extra = '' }) {
 export default function PropOverlays({ state }) {
   return (
     <>
-      {state.ripple && (
-        <span key={state.ripple} className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
+      {(state.ripple || state.stir) && (
+        <span key={state.ripple || state.stir} className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
           <span className="ripple-ring absolute aspect-square h-full rounded-full border-4 border-spectral shadow-[0_0_18px_rgba(141,243,209,.8)]" />
           <span className="ripple-ring r2 absolute aspect-square h-full rounded-full border-[3px] border-spectral/80" />
         </span>
@@ -49,6 +49,8 @@ export default function PropOverlays({ state }) {
       {state.remembered && !state.empty && !state.pending && <Badge tone="ink" extra="opacity-80">Searched</Badge>}
       {state.searched && !state.possessed && <Badge k={state.searched} tone="ink">Searched</Badge>}
       {state.ripple && !state.possessed && !state.empty && <Badge k={state.ripple} tone="mint">Ripple</Badge>}
+      {state.clued && !state.pending && <Badge k={state.clued} tone="amber">Clue</Badge>}
+      {state.notIt && !state.pending && !state.possessed && <Badge k={state.notIt} tone="ink">Not it</Badge>}
     </>
   );
 }

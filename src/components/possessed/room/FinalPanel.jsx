@@ -5,6 +5,7 @@ import PrimaryAction from '@/components/possessed/room/PrimaryAction';
 import GhostFace from '@/components/possessed/art/GhostFace';
 import SurvivalCard from '@/components/possessed/room/SurvivalCard';
 import ShareResult from '@/components/possessed/room/ShareResult';
+import ScoreStrip from '@/components/possessed/room/ScoreStrip';
 import SurvivalBars from '@/components/possessed/room/SurvivalBars';
 import { precisionFor, secs, finalLine, shareText } from '@/lib/possessed/format';
 
@@ -36,6 +37,7 @@ export default function FinalPanel({ view, act, pending, onLeave, onNewHaunt, qu
       <SurvivalBars roundMs={view.balance.roundMs} digits={digits}
         rows={[r1, r2].map((r) => ({ name: nameOf(r), ms: r.survivalMs, winner: !draw && r.ghostSeat === view.winner }))} />
       <p className="text-sm font-bold text-parchment/85">{finalLine({ draw, won, practice: view.practice, gap })}</p>
+      <ScoreStrip view={view} />
       <SeatList view={view} field="rematch" yes="Wants a rematch" no="Deciding" />
       <PrimaryAction>
         <BigButton pressed={me.rematch} busy={pending?.type === 'rematch'} tone={me.rematch ? 'mint' : 'amber'} onClick={() => act('rematch', { value: !me.rematch })}>
@@ -43,7 +45,7 @@ export default function FinalPanel({ view, act, pending, onLeave, onNewHaunt, qu
         </BigButton>
       </PrimaryAction>
       <div className="grid grid-cols-3 gap-2">
-        <ShareResult text={shareText({ draw, won, practice: view.practice, mineMs: mine?.survivalMs ?? 0, gap })} />
+        <ShareResult text={shareText({ draw, won, practice: view.practice, mineMs: mine?.survivalMs ?? 0, gap, round: mine })} />
         {quick
           ? <BigButton compact tone="ghost" onClick={onFindNew}><Search className="h-5 w-5" aria-hidden="true" />Find new opponent</BigButton>
           : <BigButton compact tone="ghost" onClick={onNewHaunt}><Plus className="h-5 w-5" aria-hidden="true" />New haunt</BigButton>}

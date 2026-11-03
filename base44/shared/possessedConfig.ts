@@ -4,10 +4,14 @@ export const BALANCE = {
   roundMs: 60000,            // max active seconds per round (full survival score)
   countdownMs: 3000,         // synchronized pre-round countdown
   moveCooldownMs: 8000,      // Ghost cooldown between possessions
+  lateMoveCooldownMs: 6000,  // ...after lateAfterMs of active time
+  lateAfterMs: 30000,
+  stillPressureMs: 20000,    // a Ghost that hasn't relocated this long starts stirring its prop
+  stirEveryMs: 10000,        // ...once every this often (prop glow for the Hunter)
   startMoveReadyMs: 0,       // active ms before the Ghost's first move is allowed
   startCharges: 3,           // Hunter investigation charges at round start
   maxCharges: 3,
-  chargeRegenMs: 5000,       // one spent charge regenerates every 5 active seconds
+  chargeRegenMs: 7000,       // one spent charge regenerates every 7 active seconds
   clueTimesMs: [12000, 24000, 36000, 48000],
   clueDurationMs: 2000,      // room highlight duration (client display)
   rippleMs: 1000,            // ripple on the abandoned object (client display)

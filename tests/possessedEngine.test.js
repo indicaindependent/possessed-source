@@ -218,10 +218,48 @@ export default function tests(G, C, assert) {
       A(s, hunter, 'investigate', { objectId: empties[2] }, at(1000));
       const noCharge = A(s, hunter, 'investigate', { objectId: empties[3] }, at(1100));
       assert(noCharge.some((e) => e.msg.reason === 'no_charges'), 'rejected with 0 charges');
-      let v = G.view(s, hunter, at(6000));
-      assert(v.hunter.charges === 1 && v.hunter.regenElapsedMs === 0, `one regen at 5s (${JSON.stringify(v.hunter)})`);
+      let v = G.view(s, hunter, at(8000));
+      assert(v.hunter.charges === 1 && v.hunter.regenElapsedMs === 0, `one regen at 7s (${JSON.stringify(v.hunter)})`);
       v = G.view(s, hunter, at(40000));
       assert(v.hunter.charges === 3 && v.hunter.regenElapsedMs === null, 'full after long gap, max 3');
+    }],
+    ['pressure: a still Ghost stirs every 10s after 20s; moving resets it; cooldown 6s after 30s', () => {
+      const s = started(); const { ghost, hunter } = roles(s);
+      const stirs = [];
+      for (let ms = 0; ms <= 41000; ms += 500) {
+        for (const e of G.advance(s, at(ms))) if (e.msg.kind === 'stir') { stirs.push(ms); assert(e.to === hunter && e.msg.objectId === s.ghostObject, 'stir goes to hunter with live prop'); }
+      }
+      assert(JSON.stringify(stirs) === JSON.stringify([20000, 30000, 40000]), `stirs at 20/30/40 (${stirs})`);
+      const to = other(s, s.ghostObject);
+      A(s, ghost, 'possess', { objectId: to }, at(41000));
+      assert(s.moveReadyAt === 47000, `late cooldown 6s (${s.moveReadyAt})`);
+      assert(s.nextStirAt === 61000, 'moving resets the stir clock');
+    }],
+    ['clue ladder: room, room, room + two wrong props, three props incl. the Ghost', () => {
+      const s = started();
+      const clues = [];
+      for (let ms = 0; ms <= 48000; ms += 500) for (const e of G.advance(s, at(ms))) if (e.msg.kind === 'clue') clues.push(e.msg);
+      assert(clues.length === 4, 'four clues');
+      const g = s.ghostObject; const room = C.ROOM_OF[g];
+      assert(clues[0].room === room && clues[0].props.length === 0, 'clue 1 room only');
+      assert(clues[1].room === room && clues[1].props.length === 0, 'clue 2 room only');
+      assert(clues[2].room === room && clues[2].props.length === 2 && !clues[2].props.includes(g) && clues[2].props.every((p) => C.ROOM_OF[p] === room), 'clue 3 two wrong props in room');
+      assert(clues[3].props.length === 3 && clues[3].props.includes(g) && new Set(clues[3].props).size === 3, 'clue 4 three props incl ghost');
+      assert(clues[3].props.filter((p) => C.ROOM_OF[p] === room).length === 1 && clues[3].room === null, 'clue 4 is not narrowed by a room');
+    }],
+    ['score history survives a rematch and clears when a seat is vacated', () => {
+      const s = started();
+      G.advance(s, at(B.roundMs));
+      G.act(s, 0, { type: 'ready', actionId: 'h0' }, at(B.roundMs + 10));
+      G.act(s, 1, { type: 'ready', actionId: 'h1' }, at(B.roundMs + 10));
+      const t2 = at(B.roundMs + 10) + B.countdownMs;
+      G.advance(s, t2); G.advance(s, t2 + B.roundMs);
+      assert(s.phase === 'final' && s.history.length === 1 && s.history[0].ms[0] === B.roundMs, 'match 1 recorded');
+      G.act(s, 0, { type: 'rematch', actionId: 'm0' }, t2 + B.roundMs + 10);
+      G.act(s, 1, { type: 'rematch', actionId: 'm1' }, t2 + B.roundMs + 10);
+      assert(s.history.length === 1 && G.view(s, 0, t2 + B.roundMs + 20).history.length === 1, 'kept across rematch');
+      G.leave(s, 1);
+      assert(s.history.length === 0, 'cleared on vacate');
     }],
     ['ghost move cooldown is enforced', () => {
       const s = started(); const { ghost } = roles(s);

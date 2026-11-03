@@ -16,4 +16,14 @@ describe('final copy', () => {
     expect(shareText({ won: false, practice: true, mineMs: 9000, gap: '8.1' })).toMatch(/lost to the House by 8.1 s/);
     expect(shareText({ draw: true, mineMs: 60000 })).toMatch(/tied with my rival/);
   });
+  it('share grid: 4 room lines, searched vs not, ghost marker, then sentence', () => {
+    const text = shareText({ won: true, mineMs: 41200, gap: '3', round: { hidingObject: 'portrait', searched: ['trunk', 'globe', 'portrait'] } });
+    const lines = text.split('\n');
+    expect(lines.length).toBe(5);
+    expect(lines[0]).toBe('▓▓░░░░'); // attic: trunk searched
+    expect(lines[1]).toBe('░░▓▓░░'); // library: globe
+    expect(lines[2]).toBe('░░░░👻'); // parlor: ghost in the portrait
+    expect(lines[3]).toBe('░░░░░░');
+    expect(lines[4]).toMatch(/hid for 41.2 s.*https:\/\/possessed\.base44\.app$/);
+  });
 });

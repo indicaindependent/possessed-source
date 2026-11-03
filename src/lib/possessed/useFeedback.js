@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { sfx } from '@/lib/possessed/audio';
 import { musicTail } from '@/lib/possessed/music';
-import { objectName, roomName, roomOfObject } from '@/lib/possessed/layout';
+import { objectName, roomOfObject } from '@/lib/possessed/layout';
+import { clueSentence } from '@/lib/possessed/clueText';
 import { REJECT_TEXT, secs } from '@/lib/possessed/format';
 
 const TAUNT_TEXT = {
@@ -67,12 +68,16 @@ export default function useFeedback() {
       }
       case 'moved': flash(e.from, 'ripple', 1000); sfx.move(); say(`You slipped into the ${n}.`); break;
       case 'ripple': flash(e.objectId, 'ripple', 1000); sfx.ripple(); say(`A spectral ripple! Something just left the ${n}.`); break;
+      case 'stir': flash(e.objectId, 'stir', 1000); sfx.ripple(); say('Something stirs in the house...'); break;
       case 'clue': {
         const key = `${e.index}-${Date.now()}`;
-        setClue({ room: e.room, key });
-        later(() => setClue((c) => (c?.key === key ? null : c)), 2000);
+        if (e.room) {
+          setClue({ room: e.room, key });
+          later(() => setClue((c) => (c?.key === key ? null : c)), 2000);
+        }
+        for (const id of e.props || []) flash(id, e.room ? 'notIt' : 'clued', 4000);
         sfx.chime();
-        say(`Clue: the Ghost is in the ${roomName(e.room)}!`);
+        say(clueSentence(e));
         break;
       }
       case 'round_setup': setMarks({}); setMemory({ roundId: null, ids: {} }); setClue(null); say(`Round ${e.round} is about to begin.`); break;

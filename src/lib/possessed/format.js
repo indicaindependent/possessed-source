@@ -1,3 +1,5 @@
+import { ROOM_ORDER, ROOMS } from '@/lib/possessed/layout';
+
 export const secs = (ms, digits = 1) => (Math.max(0, ms ?? 0) / 1000).toFixed(digits);
 
 // Enough precision that two different server times never look identical.
@@ -49,9 +51,17 @@ export function finalLine({ draw, won, practice, gap }) {
 }
 
 // Share copy, correct for win / loss / draw and practice. Survival is always the sharer's own Ghost round.
-export function shareText({ draw, won, practice, mineMs, gap }) {
+export function shareText({ draw, won, practice, mineMs, gap, round }) {
   const t = String(Number((mineMs / 1000).toFixed(2)));
   const foe = practice ? 'the House' : 'my rival';
   const result = draw ? `tied with ${foe}` : won ? `beat ${foe} by ${gap} s` : `lost to ${foe} by ${gap} s`;
-  return `I hid for ${t} s as the Ghost in POSSESSED and ${result}. Can you find me? https://possessed.base44.app`;
+  const grid = round ? `${shareGrid(round)}\n` : '';
+  return `${grid}I hid for ${t} s as the Ghost in POSSESSED and ${result}. Can you find me? https://possessed.base44.app`;
+}
+
+// One line per room, two characters per prop: ▓▓ searched, ░░ untouched, 👻 where the Ghost ended.
+export function shareGrid(round) {
+  const searched = new Set(round.searched || []);
+  return ROOM_ORDER.map((room) => ROOMS[room].objects
+    .map((id) => (id === round.hidingObject ? '👻' : searched.has(id) ? '▓▓' : '░░')).join('')).join('\n');
 }
