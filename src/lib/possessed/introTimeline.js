@@ -5,7 +5,7 @@ export const REDUCED_END_MS = 3000;
 // [ms, act] — each act becomes an `act-<name>` class on the overlay root and stays on.
 const CUES = [
   [0, 'stars'], [400, 'moon'], [1500, 'hint'], [1600, 'flash1'], [3000, 'warm'], [3400, 'rock'],
-  [4200, 'eyes'], [5400, 'beam'], [6200, 'freeze'], [7900, 'reopen'], [8400, 'hold'],
+  [4200, 'eyes'], [5400, 'beam'], [6200, 'freeze'], [6800, 'shut'], [7400, 'beamoff'], [7900, 'reopen'], [8400, 'hold'],
   [9300, 'pull'], [9800, 'title'], [10600, 'tag'], [11600, 'out'],
 ];
 // Reduced motion: three cross-faded stills; no push, no shake, no flash.
@@ -16,7 +16,7 @@ const REDUCED_CUES = [
 const SOUNDS = [
   [0, 'wind'], [0, 'drone'], [1900, 'thunder'], [2500, 'wind'], [3400, 'creak'], [5000, 'wind'],
   [5400, 'sweep'], [6000, 'drone'], [7900, 'knock'], [8400, 'duck'], [9300, 'unduck'],
-  [9620, 'thunder'], [9800, 'thump'], [9850, 'creak'], [10700, 'heartbeat'], [11300, 'heartbeat'],
+  [9800, 'thunder'], [9800, 'thump'], [9850, 'creak'], [10700, 'heartbeat'], [11300, 'heartbeat'],
 ];
 const REDUCED_SOUNDS = [[0, 'wind'], [0, 'drone'], [1000, 'creak'], [2000, 'thump'], [2200, 'heartbeat']];
 
@@ -59,27 +59,34 @@ export function introVars(t, reduced = false) {
   let push = 0;
   if (t >= 400 && t < 9300) push = ease(clamp01((t - 400) / 5000));
   else if (t >= 9300) push = 1 - ease(clamp01((t - 9300) / 1000));
-  const flash = Math.max(flashAt(t, 1600), flashAt(t, 9620));
+  const flash = Math.max(flashAt(t, 1600), flashAt(t, 9800));
   const beam = t >= 5400 && t <= 7400 ? -100 + ((t - 5400) / 2000) * 330 : -200;
   return { push, flash, beam };
 }
 
 // Push-in target from measured boxes (viewport px; house = the camera element unscaled, origin top-left).
 // Scale fits the Parlor with margin; translate centres it, clamped so the house never leaves an empty edge.
-export function pushFraming({ vw, vh, house, parlor, max = 1.9, fill = 0.86 }) {
+// Phones: Parlor ~88% of the width, centred at 52% height; the house may slide down (fog covers its edge).
+export const framingOpts = (vw) => (vw < 768 ? { fill: 0.88, cy: 0.52, clampY: false } : {});
+export function pushFraming({ vw, vh, house, parlor, max = 1.9, fill = 0.86, cy = 0.5, clampY = true }) {
   const scale = Math.min(max, (fill * vw) / parlor.w, (fill * vh) / parlor.h);
-  const axis = (v, h0, hs, p0, ps) => {
-    const want = v / 2 - h0 - (p0 + ps / 2 - h0) * scale;
+  const axis = (v, c, h0, hs, p0, ps, clamp) => {
+    const want = v * c - h0 - (p0 + ps / 2 - h0) * scale;
+    if (!clamp) return want;
     const a = -h0, b = v - h0 - hs * scale;
     return Math.min(Math.max(want, Math.min(a, b)), Math.max(a, b));
   };
-  return { scale, tx: axis(vw, house.x, house.w, parlor.x, parlor.w), ty: axis(vh, house.y, house.h, parlor.y, parlor.h) };
+  return {
+    scale,
+    tx: axis(vw, 0.5, house.x, house.w, parlor.x, parlor.w, true),
+    ty: axis(vh, cy, house.y, house.h, parlor.y, parlor.h, clampY),
+  };
 }
 export const camAt = (f, push) => ({ cam: 1 + (f.scale - 1) * push, tx: f.tx * push + 0, ty: f.ty * push + 0 });
 
 // Animated acts and their elapsed time at t (ms since the cue), shared by the live run and the frozen fixture.
 // The rocking loop is paused at 'freeze', so its elapsed time stops there.
-export const ANIMATED_ACTS = ['stars', 'rock', 'reopen', 'pull', 'title', 'tag'];
+export const ANIMATED_ACTS = ['stars', 'flash1', 'eyes', 'rock', 'reopen', 'pull', 'title', 'tag'];
 const HOLDS = { rock: 'freeze' };
 const cueAt = (act, reduced) => (reduced ? REDUCED_CUES : CUES).find((c) => c[1] === act)?.[0];
 export function elapsedSince(act, t, reduced = false) {

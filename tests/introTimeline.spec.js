@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createTimeline, introVars, allActs, needsGate, pushFraming, camAt, elapsedSince, END_MS, REDUCED_END_MS } from '@/lib/possessed/introTimeline';
+import { createTimeline, introVars, allActs, needsGate, pushFraming, framingOpts, camAt, elapsedSince, END_MS, REDUCED_END_MS } from '@/lib/possessed/introTimeline';
 import { introMode, markIntroSeen, INTRO_KEY } from '@/lib/possessed/introGate';
 
 const store = () => { const m = new Map(); return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, v), removeItem: (k) => m.delete(k) }; };
@@ -61,10 +61,12 @@ describe('intro timeline', () => {
   };
   it.each([[360, 780], [390, 844], [1440, 900]])('push-in at %ix%i keeps the whole Parlor on screen with no empty edge', (vw, vh) => {
     const s = stage(vw, vh);
-    const f = pushFraming(s);
+    const opts = framingOpts(vw);
+    const fill = opts.fill ?? 0.86;
+    const f = pushFraming({ ...s, ...opts });
     expect(f.scale).toBeLessThanOrEqual(1.9);
-    expect(f.scale).toBeLessThanOrEqual((0.86 * vw) / s.parlor.w + 1e-9);
-    expect(f.scale).toBeLessThanOrEqual((0.86 * vh) / s.parlor.h + 1e-9);
+    expect(f.scale).toBeLessThanOrEqual((fill * vw) / s.parlor.w + 1e-9);
+    expect(f.scale).toBeLessThanOrEqual((fill * vh) / s.parlor.h + 1e-9);
     const map = (x, h0, t) => h0 + t + (x - h0) * f.scale;
     const L = map(s.parlor.x, s.house.x, f.tx), R = map(s.parlor.x + s.parlor.w, s.house.x, f.tx);
     const T = map(s.parlor.y, s.house.y, f.ty), B = map(s.parlor.y + s.parlor.h, s.house.y, f.ty);
@@ -74,9 +76,15 @@ describe('intro timeline', () => {
     const hl = map(s.house.x, s.house.x, f.tx), hr = hl + s.house.w * f.scale;
     if (s.house.w * f.scale >= vw) { expect(hl).toBeLessThanOrEqual(0); expect(hr).toBeGreaterThanOrEqual(vw); }
     else { expect(hl).toBeGreaterThanOrEqual(0); expect(hr).toBeLessThanOrEqual(vw); }
-    const ht = map(s.house.y, s.house.y, f.ty), hb = ht + s.house.h * f.scale;
-    if (s.house.h * f.scale >= vh) { expect(ht).toBeLessThanOrEqual(0); expect(hb).toBeGreaterThanOrEqual(vh); }
-    else { expect(ht).toBeGreaterThanOrEqual(0); expect(hb).toBeLessThanOrEqual(vh); }
+    if (opts.clampY === false) {
+      // Phones: Parlor ~88% of the width, centred at 52% of the height (the house may slide down).
+      expect((R - L) / vw).toBeCloseTo(0.88, 2);
+      expect((T + B) / 2 / vh).toBeCloseTo(0.52, 5);
+    } else {
+      const ht = map(s.house.y, s.house.y, f.ty), hb = ht + s.house.h * f.scale;
+      if (s.house.h * f.scale >= vh) { expect(ht).toBeLessThanOrEqual(0); expect(hb).toBeGreaterThanOrEqual(vh); }
+      else { expect(ht).toBeGreaterThanOrEqual(0); expect(hb).toBeLessThanOrEqual(vh); }
+    }
     expect(camAt(f, 0)).toEqual({ cam: 1, tx: 0, ty: 0 });
   });
   it('reduced motion: 3 s, no push, shake or flash', () => {

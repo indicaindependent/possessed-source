@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { createTimeline, introVars, allActs, pushFraming, camAt, elapsedSince, ANIMATED_ACTS } from '@/lib/possessed/introTimeline';
+import { createTimeline, introVars, allActs, pushFraming, framingOpts, camAt, elapsedSince, ANIMATED_ACTS } from '@/lib/possessed/introTimeline';
 import { sfx, setDuck } from '@/lib/possessed/audio';
 
 const SKIP_EVENTS = ['pointerdown', 'keydown', 'touchstart', 'wheel'];
@@ -19,7 +19,8 @@ function measure(rootEl, cur) {
   const cr = cam.getBoundingClientRect(), pr = parlor.getBoundingClientRect();
   const s = cur.cam;
   const p = { x: house.x + (pr.left - cr.left) / s, y: house.y + (pr.top - cr.top) / s, w: pr.width / s, h: pr.height / s };
-  return pushFraming({ vw: rootEl.clientWidth, vh: rootEl.clientHeight, house, parlor: p });
+  const vw = rootEl.clientWidth;
+  return pushFraming({ vw, vh: rootEl.clientHeight, house, parlor: p, ...framingOpts(vw) });
 }
 
 // One requestAnimationFrame clock drives every act, sound and CSS variable; skip jumps the same clock to its end.

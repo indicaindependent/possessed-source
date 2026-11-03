@@ -16,8 +16,9 @@ function Band({ className, y, op }) {
 export default function IntroFog() {
   return (
     <div className="cine-fog pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      <Band className="cine-fog-a" y="62%" op="0.10" />
-      <Band className="cine-fog-b" y="76%" op="0.14" />
+      <div className="cine-ground absolute inset-x-0 bottom-0 h-[26%] md:hidden" />
+      <Band className="cine-fog-a" y="62%" op="0.12" />
+      <Band className="cine-fog-b" y="74%" op="0.2" />
     </div>
   );
 }
