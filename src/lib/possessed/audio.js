@@ -82,7 +82,7 @@ function startWind() {
 
 export function setAudioMuted(m) {
   muted = m;
-  if (master) master.gain.value = m ? 0 : 0.6;
+  if (master) master.gain.value = m ? 0 : 0.6 * duck;
 }
 
 // Decorative only: never unlocks audio or bypasses the player's sound preference.
@@ -105,7 +105,14 @@ function tone(freq, { at = 0, dur = 0.3, type = 'sine', gain = 0.2, to = null, a
   o.stop(t0 + dur + 0.05);
 }
 
-function noise({ at = 0, dur = 0.3, from = 1200, to = 300, gain = 0.1 }) {
+// Intro ducking: scales the whole mix (music, wind, sfx) without touching the mute preference.
+let duck = 1;
+export function setDuck(level) {
+  duck = level;
+  if (master && !muted) master.gain.setTargetAtTime(0.6 * level, ctx.currentTime, 0.15);
+}
+
+function noise({ at = 0, dur = 0.3, from = 1200, to = 300, gain = 0.1, attack = 0.04 }) {
   const t0 = ctx.currentTime + at;
   const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * dur), ctx.sampleRate);
   const data = buf.getChannelData(0);
@@ -119,7 +126,7 @@ function noise({ at = 0, dur = 0.3, from = 1200, to = 300, gain = 0.1 }) {
   f.frequency.exponentialRampToValueAtTime(to, t0 + dur);
   const g = ctx.createGain();
   g.gain.setValueAtTime(0.0001, t0);
-  g.gain.exponentialRampToValueAtTime(gain, t0 + 0.04);
+  g.gain.exponentialRampToValueAtTime(gain, t0 + attack);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
   src.connect(f).connect(g).connect(master);
   src.start(t0);
@@ -145,4 +152,10 @@ export const sfx = {
   lowTone: play(() => tone(110, { dur: 0.9, gain: 0.08, to: 82, attack: 0.12 })),
   softTick: play(() => tone(1320, { dur: 0.06, gain: 0.035 })),
   tick: play(() => tone(660, { dur: 0.09, gain: 0.07, type: 'square' })),
+  // Intro cinematic beds and hits.
+  wind: play(() => noise({ dur: 2.5, from: 400, to: 900, gain: 0.05, attack: 0.8 })),
+  thunder: play(() => { noise({ dur: 1.6, from: 120, to: 60, gain: 0.25 }); tone(48, { dur: 1.2, to: 30, gain: 0.2 }); }),
+  drone: play(() => tone(55, { type: 'sawtooth', dur: 6, gain: 0.05, attack: 1.5 })),
+  sweep: play(() => noise({ dur: 0.6, from: 300, to: 1800, gain: 0.05 })),
+  thump: play(() => tone(70, { dur: 0.35, to: 40, gain: 0.3 })),
 };

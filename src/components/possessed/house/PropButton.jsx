@@ -16,6 +16,7 @@ function PropButton({ id, interactive, disabled, label: showLabel = true, state 
   return (
     <button
       type="button"
+      data-prop={id}
       tabIndex={interactive ? 0 : -1}
       aria-hidden={interactive ? undefined : true}
       aria-label={label}

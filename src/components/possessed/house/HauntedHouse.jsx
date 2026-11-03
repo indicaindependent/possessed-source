@@ -11,7 +11,10 @@ export default memo(HauntedHouse);
 // Play grid: one room per row on portrait phones (keeps every prop >=44px with a readable label),
 // 2x2 when there is width (md+) or on short landscape screens.
 // decorative: non-interactive backdrop, always 2x2 and unlabeled so it stays legible when small.
-function HauntedHouse({ interactive = false, disabledAll = false, decorative = false, ambient = false, propStates, clue, celebrate, onPick, className = '' }) {
+// cinematic: the intro's stage — decorative, no interaction, windows dark, CSS animates it via data hooks.
+function HauntedHouse({ interactive = false, disabledAll = false, decorative: deco = false, cinematic = false, ambient = false, propStates, clue, celebrate, onPick, className = '' }) {
+  const decorative = deco || cinematic;
+  if (cinematic) { interactive = false; ambient = false; className = `cine ${className}`; }
   const houseRef = useHauntAmbience(ambient && decorative);
   const grid = decorative ? 'grid-cols-2 grid-rows-2' : 'grid-cols-1 grid-rows-4 md:grid-cols-2 md:grid-rows-2 short:grid-cols-2 short:grid-rows-2';
   return (

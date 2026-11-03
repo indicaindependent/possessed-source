@@ -7,6 +7,7 @@ export default function HouseRoom({ roomId, interactive, disabledAll, labels = t
   const clued = Boolean(clueKey);
   return (
     <section
+      data-room={roomId}
       aria-label={`${room.name}${clued ? ', clue: the Ghost is in this room' : ''}`}
       className={`wall-${roomId} relative flex min-h-0 flex-col overflow-hidden rounded-md`}
     >

@@ -1,48 +1,36 @@
-import { useEffect, useRef, useState } from 'react';
-import IntroScene from '@/components/possessed/intro/IntroScene';
-import { getAudioRunning, sfx } from '@/lib/possessed/audio';
+import { useRef, useState } from 'react';
+import IntroStage from '@/components/possessed/intro/IntroStage';
+import IntroTitle from '@/components/possessed/intro/IntroTitle';
+import IntroGate from '@/components/possessed/intro/IntroGate';
+import useIntroClock from '@/lib/possessed/useIntroClock';
+import { getAudioRunning, subscribeAudio, unlockAudio } from '@/lib/possessed/audio';
+import { markIntroSeen } from '@/lib/possessed/introGate';
+import { needsGate } from '@/lib/possessed/introTimeline';
 
-const TITLE = 'Possessed';
+// mode 'full' = 12 s cinematic, 'fade' = 3 s reduced-motion cut. frozen = fixture time in ms.
+export default function IntroOverlay({ mode, replay = false, frozen = null, onDone }) {
+  const reduced = mode === 'fade';
+  const [started, setStarted] = useState(() => frozen != null || !needsGate({ replay, audioRunning: getAudioRunning() }));
+  const root = useRef(null);
+  const { acts, skipping } = useIntroClock({ started, reduced, frozen, root, onDone });
 
-// mode 'full' = 4 s sequence, 'fade' = 1 s fade from black. Any input skips to the end.
-export default function IntroOverlay({ mode, onDone }) {
-  const [leaving, setLeaving] = useState(false);
-  const done = useRef(false);
-  const finish = useRef(() => {});
-  finish.current = () => { if (!done.current) { done.current = true; onDone(); } };
+  const enter = () => {
+    unlockAudio();
+    markIntroSeen(window.localStorage);
+    let off = () => {};
+    const go = () => { off(); clearTimeout(t); setStarted(true); };
+    const t = setTimeout(go, 400);
+    off = subscribeAudio((on) => on && go());
+    if (getAudioRunning()) go();
+  };
 
-  useEffect(() => {
-    const timers = [];
-    const later = (ms, fn) => timers.push(setTimeout(fn, ms));
-    if (mode === 'full') {
-      if (getAudioRunning()) { later(1800, sfx.lowTone); later(2600, sfx.creak); }
-      later(3400, () => setLeaving(true));
-      later(4000, () => finish.current());
-    } else {
-      later(1000, () => finish.current());
-    }
-    // The skipping input does only the skip: swallow it and the click it would turn into.
-    const swallow = (e) => { e.preventDefault(); e.stopPropagation(); };
-    const skip = (e) => {
-      swallow(e);
-      window.addEventListener('click', swallow, { capture: true, once: true });
-      setTimeout(() => window.removeEventListener('click', swallow, { capture: true }), 600);
-      finish.current();
-    };
-    const evs = ['pointerdown', 'keydown', 'touchstart'];
-    evs.forEach((e) => window.addEventListener(e, skip, { capture: true, passive: false }));
-    return () => { timers.forEach(clearTimeout); evs.forEach((e) => window.removeEventListener(e, skip, { capture: true })); };
-  }, [mode]);
-
-  if (mode === 'fade') return <div className="intro-fade fixed inset-0 z-50 bg-ink" aria-hidden="true" />;
+  if (!started) return <IntroGate onEnter={enter} />;
   return (
-    <div className={`fixed inset-0 z-50 overflow-hidden bg-ink ${leaving ? 'intro-leave' : ''}`} aria-hidden="true">
-      <IntroScene />
-      <p className="title-emboss absolute inset-x-0 top-[18%] text-center font-display text-5xl font-black tracking-[-0.02em] text-parchment sm:text-7xl">
-        {TITLE.split('').map((c, i) => (
-          <span key={i} className="intro-letter inline-block" style={{ animationDelay: `${2600 + i * 70}ms` }}>{c}</span>
-        ))}
-      </p>
+    <div ref={root} className={`cine-root fixed inset-0 z-50 overflow-hidden bg-ink ${reduced ? 'cine-reduced' : ''} ${skipping ? 'cine-skip' : ''} ${acts.map((a) => `act-${a}`).join(' ')}`} aria-hidden="true">
+      <IntroStage />
+      <div className="cine-flash pointer-events-none absolute inset-0 bg-parchment" />
+      <IntroTitle />
+      <p className="cine-hint pointer-events-none absolute inset-x-0 bottom-[max(env(safe-area-inset-bottom),1.25rem)] text-center font-body text-xs tracking-[0.12em] text-parchment">tap to skip</p>
     </div>
   );
 }
