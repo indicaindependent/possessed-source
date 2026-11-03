@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import NightSky from '@/components/possessed/house/NightSky';
 import HomeScreen from '@/components/possessed/screens/HomeScreen';
+import IntroOverlay from '@/components/possessed/intro/IntroOverlay';
+import { introMode, markIntroSeen } from '@/lib/possessed/introGate';
 import RoomScreen from '@/components/possessed/room/RoomScreen';
 import usePrefs from '@/lib/possessed/usePrefs';
 import { attemptAutoplay, unlockAudio } from '@/lib/possessed/audio';
@@ -61,9 +63,21 @@ export default function Game() {
   }, [begin]);
 
   const initialCode = new URLSearchParams(window.location.search).get('room') || '';
+  const [intro, setIntro] = useState(() => introMode({
+    storage: window.localStorage, search: window.location.search, pathname: window.location.pathname,
+    reducedMotion: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
+  }));
+  const [glow, setGlow] = useState(false);
+  const endIntro = useCallback(() => {
+    markIntroSeen(window.localStorage);
+    setIntro('none');
+    setGlow(true);
+    setTimeout(() => setGlow(false), 1200);
+  }, []);
 
   return (
-    <div className={session ? 'calm' : undefined}>
+    <div className={[session ? 'calm' : '', glow ? 'intro-glow' : ''].join(' ').trim() || undefined}>
+      {!session && intro !== 'none' && <IntroOverlay mode={intro} onDone={endIntro} />}
       <NightSky />
       {session ? (
         <RoomScreen session={session} prefs={prefs} onFatal={onFatal} onSeated={onSeated} onExit={() => exit()}

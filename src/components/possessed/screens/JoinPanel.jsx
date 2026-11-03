@@ -25,11 +25,11 @@ export default function JoinPanel({ name, onName, joining, setJoining, initialCo
               <p className="mb-1.5 text-[13px] font-extrabold uppercase tracking-[0.06em] text-parchment/85">Play with a friend</p>
               <div className="grid grid-cols-2 gap-2.5">
                 <button type="button" onClick={onCreate} disabled={busy}
-                  className="flex h-12 items-center justify-center gap-2 rounded-xl border-2 border-pumpkin/90 bg-pumpkin/5 px-2 font-display text-base font-bold tracking-[0.01em] text-pumpkin transition hover:bg-pumpkin/15 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-parchment disabled:opacity-60 sm:text-lg">
+                  className="intro-cta flex h-12 items-center justify-center gap-2 rounded-xl border-2 border-pumpkin/90 bg-pumpkin/5 px-2 font-display text-base font-bold tracking-[0.01em] text-pumpkin transition hover:bg-pumpkin/15 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-parchment disabled:opacity-60 sm:text-lg">
                   {busy && <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />} Create a Haunt
                 </button>
                 <button type="button" onClick={() => setJoining(true)} disabled={busy}
-                  className="h-12 rounded-xl border-2 border-spectral/90 bg-spectral/5 px-2 font-display text-base font-bold tracking-[0.01em] text-spectral transition hover:bg-spectral/15 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-parchment sm:text-lg">
+                  className="intro-cta h-12 rounded-xl border-2 border-spectral/90 bg-spectral/5 px-2 font-display text-base font-bold tracking-[0.01em] text-spectral transition hover:bg-spectral/15 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-parchment sm:text-lg">
                   Join a Friend
                 </button>
               </div>

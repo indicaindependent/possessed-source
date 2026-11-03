@@ -142,6 +142,7 @@ export const sfx = {
   creak: play(() => tone(150, { dur: 0.7, to: 95, gain: 0.12, type: 'sawtooth' })),
   breath: play(() => noise({ dur: 1.1, from: 700, to: 300, gain: 0.09 })),
   giggle: play(() => [0, 0.12, 0.24, 0.36].forEach((at, i) => tone(1100 - i * 60, { at, dur: 0.09, gain: 0.07, to: 1250 - i * 60 }))),
+  lowTone: play(() => tone(110, { dur: 0.9, gain: 0.08, to: 82, attack: 0.12 })),
   softTick: play(() => tone(1320, { dur: 0.06, gain: 0.035 })),
   tick: play(() => tone(660, { dur: 0.09, gain: 0.07, type: 'square' })),
 };
