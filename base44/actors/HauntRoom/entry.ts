@@ -3,6 +3,11 @@ import { BALANCE, LIMITS, CODE_RE } from '../../shared/possessedConfig.ts';
 import * as G from '../../shared/possessedEngine.ts';
 import { identityKey, createLimiter } from '../../shared/possessedActorUtil.ts';
 import { reportMatch } from '../../shared/liveMatches.ts';
+import { botDecide, BOT_SEAT } from '../../shared/possessedBot.ts';
+
+// Practice ("The House") seat: no socket, never disconnects, auto-readies and auto-rematches.
+export const BOT_CONN = 'bot:house';
+const isBot = (st) => !!st && st.connId === BOT_CONN;
 
 // A seat is only reclaimed when the verified identity also matches (see identityKey).
 const IN_MATCH = new Set(['countdown', 'active', 'intermission']);
@@ -45,12 +50,12 @@ export default class HauntRoom extends Actor {
 
   // Tell the live-match registry when a match starts or stops (counts only, for Home).
   async report(active) {
-    try { await reportMatch(this.client, this.instanceId, active); } catch { /* presence is best-effort; never block play */ }
+    try { await reportMatch(this.client, this.instanceId, active, this.s?.practice ? 'practice' : 'match'); } catch { /* presence is best-effort; never block play */ }
   }
 
   connFor(i) {
     const st = this.s?.seats[i];
-    if (!st) return null;
+    if (!st || isBot(st)) return null;
     return this.getConnections().find((c) => c.id === st.connId && (!st.idKey || identityKey(c) === st.idKey)) ?? null;
   }
 
@@ -68,7 +73,33 @@ export default class HauntRoom extends Actor {
   }
 
   // ack: the sender's own actionId, sent after the outcome so the client can clear "pending".
+  // The House's turn: ready/rematch bookkeeping plus at most one gameplay action per call.
+  botOut(now) {
+    const s = this.s;
+    if (!s?.practice || !isBot(s.seats[BOT_SEAT])) return [];
+    const bot = s.seats[BOT_SEAT];
+    const human = s.seats[1 - BOT_SEAT];
+    const id = () => { s.botN = (s.botN ?? 0) + 1; return `bot-${s.botN}`; };
+    if ((s.phase === 'lobby' || s.phase === 'intermission') && !bot.ready) return G.act(s, BOT_SEAT, { type: 'ready', actionId: id(), value: true }, now);
+    if (s.phase === 'final' && !bot.rematch && human) return G.act(s, BOT_SEAT, { type: 'rematch', actionId: id(), value: true }, now);
+    const move = botDecide(s, now, G.random);
+    return move ? G.act(s, BOT_SEAT, { ...move, actionId: id() }, now) : [];
+  }
+
+  // A practice room exists only for its human: once they vacate, it ends.
+  async endPractice() {
+    const wasReported = !!this.s.reported;
+    await this.storage.deleteAll();
+    this.s = { created: true, expired: true, practice: true };
+    await this.storage.put('state', this.s);
+    if (wasReported) await this.report(false);
+  }
+
   async commit(out = [], ack = null) {
+    if (this.s?.practice) {
+      out = [...out, ...this.botOut(Date.now())];
+      if (!this.s.seats[1 - BOT_SEAT]) { this.deliver(out); if (ack?.actionId) ack.conn.send({ type: 'ack', actionId: ack.actionId }); return this.endPractice(); }
+    }
     this.deliver(out);
     this.sendViews();
     if (ack?.actionId) ack.conn.send({ type: 'ack', actionId: ack.actionId });
@@ -78,7 +109,7 @@ export default class HauntRoom extends Actor {
     await this.storage.put('state', this.s);
     const d = G.nextDeadline(this.s);
     if (d && d !== this.scheduledDeadline) { this.scheduledDeadline = d; await this.schedule('deadline', d + 100); }
-    const anyone = this.s.seats.some((st) => st && st.connected);
+    const anyone = this.s.seats.some((st) => st && st.connected && !isBot(st));
     if (!anyone && !this.expireArmed) { this.expireArmed = true; await this.schedule('expire', Date.now() + BALANCE.emptyRoomExpireMs); }
     if (anyone && this.expireArmed) { this.expireArmed = false; await this.cancelSchedule('expire'); }
     if (reportNow) await this.report(playing);
@@ -91,7 +122,7 @@ export default class HauntRoom extends Actor {
     const now = Date.now();
     const out = [];
     this.s.seats.forEach((st, i) => {
-      if (!st) return;
+      if (!st || isBot(st)) return;
       const attached = !!this.connFor(i);
       if (st.connected && !attached) out.push(...G.disconnect(this.s, i, now));
       else if (!st.connected && attached) out.push(...G.reconnect(this.s, i, now));
@@ -160,22 +191,26 @@ export default class HauntRoom extends Actor {
     if (this.s?.expired) { conn.send({ type: 'error', code: 'expired' }); return; }
     // 'quick': a Matchmaker-assigned code. Either matched player may arrive first, so it
     // creates-or-joins, but only ever a quick room (never someone's private haunt).
-    const intent = msg.intent === 'create' || msg.intent === 'quick' ? msg.intent : 'join';
+    const intent = ['create', 'quick', 'practice'].includes(msg.intent) ? msg.intent : 'join';
     if (!this.live()) {
       if (intent === 'join') { conn.send({ type: 'error', code: 'not_found' }); return; }
       this.s = G.newState(code);
       if (intent === 'quick') this.s.quick = true;
+      if (intent === 'practice') this.s.practice = true;
     } else {
       const existing = G.seatOf(this.s, conn.id);
       if (existing >= 0) {
         if (!this.ownsSeat(conn, existing)) { conn.send({ type: 'error', code: 'seat_mismatch' }); return; }
         return this.commit([...G.advance(this.s, now), ...G.reconnect(this.s, existing, now)]);
       }
-      if (intent === 'create' || (intent === 'quick' && !this.s.quick)) { conn.send({ type: 'error', code: 'code_taken' }); return; }
+      if (intent === 'create' || intent === 'practice' || this.s.practice || (intent === 'quick' && !this.s.quick)) { conn.send({ type: 'error', code: 'code_taken' }); return; }
     }
     const pre = G.advance(this.s, now);
     const r = G.join(this.s, conn.id, identityKey(conn), msg.name);
     if (r.error) { conn.send({ type: 'error', code: r.error }); return; }
+    if (this.s.practice) {
+      this.s.seats[BOT_SEAT] = { connId: BOT_CONN, idKey: 'bot', name: 'The House', ready: true, rematch: false, connected: true, graceUntil: null };
+    }
     // Quick match: arriving counts as Ready, through the normal rule (the countdown starts
     // only when both seats are connected and ready).
     const auto = this.s.quick && this.s.phase === 'lobby'
@@ -198,7 +233,8 @@ export default class HauntRoom extends Actor {
 
   async handleTick() {
     if (!this.live()) return;
-    const out = G.advance(this.s, Date.now());
+    const now = Date.now();
+    const out = [...G.advance(this.s, now), ...this.botOut(now)];
     if (out.length) await this.commit(out);
   }
 

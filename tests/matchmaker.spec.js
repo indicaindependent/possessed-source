@@ -24,7 +24,13 @@ function env(instanceId) {
 // In-memory LiveMatch table standing in for the service-role entities client.
 function fakeClient() {
   const rows = [];
-  const match = (r, q) => Object.entries(q).every(([k, v]) => (v && typeof v === 'object' && '$gt' in v ? r[k] > v.$gt : r[k] === v));
+  const cond = (x, v) => {
+    if (!v || typeof v !== 'object') return x === v;
+    if ('$gt' in v) return x > v.$gt;
+    if ('$ne' in v) return x !== v.$ne;
+    return false;
+  };
+  const match = (r, q) => Object.entries(q).every(([k, v]) => cond(r[k], v));
   const LiveMatch = {
     rows,
     filter: async (q) => rows.filter((r) => match(r, q)),
@@ -140,6 +146,20 @@ test('presence counts rise and fall; matches reported by HauntRoom are counted',
   expect(lastCounts(B).matches).toBe(0);
   await close(a, e, A);
   expect(lastCounts(B)).toMatchObject({ online: 1, searching: 0 });
+});
+
+test('practice rooms are counted as practice, never as live matches', async () => {
+  const { e, a, client } = await mm();
+  const W = conn('tab-w', 'anon-w'); await open(a, e, W);
+  const re = env('haunt-ACDEFK'); const room = boot(HauntRoom, re, client);
+  const P = conn('p', 'anon-p');
+  await open(room, re, P); await room.handleMessage(P, { type: 'hello', intent: 'practice', name: 'Solo' });
+  await room.handleMessage(P, { type: 'ready', actionId: 'r1', value: true });
+  t += 16000; await a.handleMessage(W, { type: 'ping' });
+  expect(lastCounts(W)).toMatchObject({ matches: 0, practice: 1, online: 1 });
+  await room.handleMessage(P, { type: 'leave' });
+  t += 16000; await a.handleMessage(W, { type: 'ping' });
+  expect(lastCounts(W).practice).toBe(0);
 });
 
 test('quick intent never joins a private haunt, and private codes stay private', async () => {

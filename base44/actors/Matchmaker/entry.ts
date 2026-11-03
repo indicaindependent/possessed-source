@@ -1,7 +1,7 @@
 import { Actor } from 'base44:runtime/actors';
 import { identityKey, createLimiter } from '../../shared/possessedActorUtil.ts';
 import { generateRoomCode } from '../../shared/possessedRoomCode.ts';
-import { countActiveMatches } from '../../shared/liveMatches.ts';
+import { countActiveMatches, countActivePractice } from '../../shared/liveMatches.ts';
 
 // One fixed instance ("global"). Every Home-screen tab holds one socket here.
 // Messages OUT carry only counts, your own queue status, and your own room code:
@@ -18,6 +18,7 @@ export default class Matchmaker extends Actor {
   loaded = false;
   limiter = createLimiter();
   matches = null;           // null = unknown (registry unreachable)
+  practice = null;          // active practice rooms (vs The House); never part of `matches`
   matchesAt = 0;
   recent = [];
 
@@ -57,7 +58,7 @@ export default class Matchmaker extends Actor {
       if (k) people.add(k);
     }
     const m = this.matches;
-    return { type: 'counts', online: people.size + 2 * (m ?? 0), searching: this.queue.length, matches: m };
+    return { type: 'counts', online: people.size + 2 * (m ?? 0), searching: this.queue.length, matches: m, practice: this.practice };
   }
 
   broadcastCounts(except = null) {
@@ -68,9 +69,10 @@ export default class Matchmaker extends Actor {
   async refreshMatches(now) {
     if (now - this.matchesAt < MM.matchRefreshMs) return false;
     this.matchesAt = now;
-    const before = this.matches;
+    const before = [this.matches, this.practice];
     try { this.matches = await countActiveMatches(this.client, now); } catch { this.matches = null; }
-    return before !== this.matches;
+    try { this.practice = await countActivePractice(this.client, now); } catch { this.practice = null; }
+    return before[0] !== this.matches || before[1] !== this.practice;
   }
 
   freshCode() {
