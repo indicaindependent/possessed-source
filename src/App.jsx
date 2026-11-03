@@ -10,6 +10,7 @@ import ScrollToTop from './components/ScrollToTop';
 import Game from '@/pages/Game';
 import OgCard from '@/pages/OgCard';
 import DevFixture from '@/pages/DevFixture';
+import ErrorBoundary from '@/components/possessed/ErrorBoundary';
 import LayoutProbe from '@/components/possessed/dev/LayoutProbe';
 
 const DEV = import.meta.env.DEV;
@@ -22,7 +23,7 @@ const AuthenticatedApp = () => {
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-plum border-t-pumpkin rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -60,7 +61,7 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <ScrollToTop />
-          <AuthenticatedApp />
+          <ErrorBoundary><AuthenticatedApp /></ErrorBoundary>
         </Router>
         <Toaster />
       </QueryClientProvider>
