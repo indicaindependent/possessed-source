@@ -53,16 +53,40 @@ function flashAt(t, start) {
   return FLASH[i] + (FLASH[i + 1] - FLASH[i]) * (x - i);
 }
 
-// Continuous values written as CSS variables: camera scale, flash opacity, beam offset (% of its width).
-export function introVars(t, reduced = false, wide = false) {
-  if (reduced) return { cam: 1, flash: 0, beam: -200 };
-  const full = wide ? 1.7 : 1.9;
-  let cam = 1;
-  if (t >= 400 && t < 9300) cam = 1 + (full - 1) * ease(clamp01((t - 400) / 5000));
-  else if (t >= 9300) cam = full - (full - 1) * ease(clamp01((t - 9300) / 1000));
+// Continuous values: push (0 = whole house, 1 = framed on the Parlor), flash opacity, beam offset (% of its width).
+export function introVars(t, reduced = false) {
+  if (reduced) return { push: 0, flash: 0, beam: -200 };
+  let push = 0;
+  if (t >= 400 && t < 9300) push = ease(clamp01((t - 400) / 5000));
+  else if (t >= 9300) push = 1 - ease(clamp01((t - 9300) / 1000));
   const flash = Math.max(flashAt(t, 1600), flashAt(t, 9620));
   const beam = t >= 5400 && t <= 7400 ? -100 + ((t - 5400) / 2000) * 330 : -200;
-  return { cam, flash, beam };
+  return { push, flash, beam };
+}
+
+// Push-in target from measured boxes (viewport px; house = the camera element unscaled, origin top-left).
+// Scale fits the Parlor with margin; translate centres it, clamped so the house never leaves an empty edge.
+export function pushFraming({ vw, vh, house, parlor, max = 1.9, fill = 0.86 }) {
+  const scale = Math.min(max, (fill * vw) / parlor.w, (fill * vh) / parlor.h);
+  const axis = (v, h0, hs, p0, ps) => {
+    const want = v / 2 - h0 - (p0 + ps / 2 - h0) * scale;
+    const a = -h0, b = v - h0 - hs * scale;
+    return Math.min(Math.max(want, Math.min(a, b)), Math.max(a, b));
+  };
+  return { scale, tx: axis(vw, house.x, house.w, parlor.x, parlor.w), ty: axis(vh, house.y, house.h, parlor.y, parlor.h) };
+}
+export const camAt = (f, push) => ({ cam: 1 + (f.scale - 1) * push, tx: f.tx * push + 0, ty: f.ty * push + 0 });
+
+// Animated acts and their elapsed time at t (ms since the cue), shared by the live run and the frozen fixture.
+// The rocking loop is paused at 'freeze', so its elapsed time stops there.
+export const ANIMATED_ACTS = ['stars', 'rock', 'reopen', 'pull', 'title', 'tag'];
+const HOLDS = { rock: 'freeze' };
+const cueAt = (act, reduced) => (reduced ? REDUCED_CUES : CUES).find((c) => c[1] === act)?.[0];
+export function elapsedSince(act, t, reduced = false) {
+  const at = cueAt(act, reduced);
+  if (at == null || t < at) return null;
+  const stop = HOLDS[act] && cueAt(HOLDS[act], reduced);
+  return (stop != null && t >= stop ? stop : t) - at;
 }
 
 // The tap-to-enter gate only exists to unlock sound on a first visit; Replay never shows it.

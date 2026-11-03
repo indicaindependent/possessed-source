@@ -11,7 +11,7 @@ export default function IntroStars() {
   return (
     <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
       {stars.map((st, i) => (
-        <circle key={i} className="intro-star" cx={st.x} cy={st.y} r={st.rad} fill="#FFF0D4" style={{ animationDelay: `${st.d}ms` }} />
+        <circle key={i} className="intro-star" cx={st.x} cy={st.y} r={st.rad} fill="#FFF0D4" style={{ '--d': `${st.d}ms` }} />
       ))}
     </svg>
   );

@@ -26,7 +26,7 @@ export default function IntroOverlay({ mode, replay = false, frozen = null, onDo
 
   if (!started) return <IntroGate onEnter={enter} />;
   return (
-    <div ref={root} className={`cine-root fixed inset-0 z-50 overflow-hidden bg-ink ${reduced ? 'cine-reduced' : ''} ${skipping ? 'cine-skip' : ''} ${acts.map((a) => `act-${a}`).join(' ')}`} aria-hidden="true">
+    <div ref={root} className={`cine-root fixed inset-0 z-50 overflow-hidden bg-ink ${reduced ? 'cine-reduced' : ''} ${skipping ? 'cine-skip' : ''} ${frozen != null ? 'cine-frozen' : ''} ${acts.map((a) => `act-${a}`).join(' ')}`} aria-hidden="true">
       <IntroStage />
       <div className="cine-flash pointer-events-none absolute inset-0 bg-parchment" />
       <IntroTitle />
