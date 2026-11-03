@@ -4,8 +4,9 @@ import JoinPanel from '@/components/possessed/screens/JoinPanel';
 import HowToPlay from '@/components/possessed/screens/HowToPlay';
 import LivePresence from '@/components/possessed/screens/LivePresence';
 import QuickMatch from '@/components/possessed/screens/QuickMatch';
-import SoundToggle from '@/components/possessed/screens/SoundToggle';
 import { searchMatch, useMatchmaker } from '@/lib/possessed/matchmaker';
+
+const FOOT_LINK = 'font-body text-sm text-parchment/70 underline-offset-4 hover:text-parchment hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pumpkin';
 
 // Entry first: name + Quick Match + Play with a friend sit near the top at every size; the house is a backdrop.
 export default function HomeScreen({ initialCode = '', busy, error, onCreate, onJoin, onPractice, autoSearch = false, prefs, onReplayIntro }) {
@@ -22,11 +23,6 @@ export default function HomeScreen({ initialCode = '', busy, error, onCreate, on
   return (
     <main className="relative mx-auto flex min-h-[100dvh] w-full max-w-6xl flex-col items-center gap-5 px-4 pb-8 pt-[max(env(safe-area-inset-top),1rem)] lg:flex-row lg:items-center lg:gap-12 lg:px-8 short:flex-row short:items-start short:gap-4 short:pb-4 short:pt-3">
       <div className="relative z-10 w-full max-w-md shrink-0 lg:w-[440px] short:w-[340px]">
-        {prefs && (
-          <div className="mb-0.5 flex justify-end">
-            <SoundToggle prefs={prefs} />
-          </div>
-        )}
         <header className="text-center lg:text-left short:text-left">
           <h1 className="title-emboss font-display text-[2.6rem] font-black leading-[1.02] tracking-[-0.02em] text-parchment sm:text-6xl short:text-3xl">Possessed</h1>
           <p className="mt-0.5 font-body text-base font-extrabold italic tracking-[0.015em] text-spectral drop-shadow-[0_2px_10px_rgba(141,243,209,.25)] sm:text-lg short:text-sm">“One of these things is you.”</p>
@@ -42,11 +38,16 @@ export default function HomeScreen({ initialCode = '', busy, error, onCreate, on
           />
         </section>
         <HowToPlay />
-        {onReplayIntro && (
-          <button type="button" onClick={onReplayIntro} className="mx-auto mt-3 block font-body text-sm text-parchment/70 underline-offset-4 hover:text-parchment hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pumpkin lg:mx-0">
-            Replay the opening
-          </button>
-        )}
+        <div className="mt-3 flex items-center justify-center gap-4 lg:justify-start">
+          {onReplayIntro && (
+            <button type="button" onClick={onReplayIntro} className={FOOT_LINK}>Replay the opening</button>
+          )}
+          {prefs && (
+            <button type="button" onClick={prefs.toggleMute} aria-pressed={prefs.muted} className={FOOT_LINK}>
+              {prefs.muted ? 'Sound on' : 'Sound off'}
+            </button>
+          )}
+        </div>
       </div>
       <div className="pointer-events-none relative z-0 h-[300px] w-full max-w-xl opacity-90 sm:h-[380px] lg:h-[560px] lg:max-w-none lg:flex-1 short:sticky short:top-3 short:h-[calc(100dvh-1.5rem)] short:flex-1" aria-hidden="true">
         <HauntedHouse decorative ambient className="h-full" />

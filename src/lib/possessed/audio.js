@@ -2,7 +2,7 @@ import { startMusic } from '@/lib/possessed/music';
 import creak from '@/lib/possessed/creak';
 
 // Tiny Web Audio synth. Autoplay is attempted on load; browsers that block it (Safari on iPhone)
-// leave the context suspended, so the home screen's speaker button finishes the job on first tap.
+// leave the context suspended, so the opening's gate tap finishes the job.
 let ctx = null;
 let master = null;
 let muted = typeof localStorage !== 'undefined' && localStorage.getItem('possessed:muted') === '1';
@@ -31,9 +31,17 @@ function ensureContext() {
   master.gain.value = muted ? 0 : 0.6;
   master.connect(ctx.destination);
   ctx.onstatechange = () => setRunning(ctx.state === 'running');
+  startAmbient();
+  return ctx;
+}
+
+// Wind + soundtrack start exactly once per page; later calls (gate tap, autoplay, prefs) are no-ops.
+let ambientStarted = false;
+export function startAmbient() {
+  if (ambientStarted || !ctx) return;
+  ambientStarted = true;
   startWind();
   startMusic(ctx, master);
-  return ctx;
 }
 
 // Starts sound without a gesture: allowed on most desktops and Android, blocked (left

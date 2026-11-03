@@ -56,6 +56,7 @@ function playBar(ctx, out, [melody, bass, chord], t) {
 export function startMusic(ctx, master) {
   // Only one soundtrack may ever run; a leftover loop (e.g. after a code reload) would layer on top and sound faster.
   const prev = globalThis.__possessedMusic;
+  if (prev && prev.ctx === ctx) return; // already playing on this context: never a second scheduler
   if (prev) { clearInterval(prev.timer); prev.ctx.close().catch(() => {}); }
   const bus = ctx.createGain();
   bus.gain.setValueAtTime(0.0001, ctx.currentTime);
