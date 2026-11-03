@@ -21,9 +21,16 @@ export default function IntroOverlay({ mode, onDone }) {
     } else {
       later(1000, () => finish.current());
     }
-    const skip = () => finish.current();
+    // The skipping input does only the skip: swallow it and the click it would turn into.
+    const swallow = (e) => { e.preventDefault(); e.stopPropagation(); };
+    const skip = (e) => {
+      swallow(e);
+      window.addEventListener('click', swallow, { capture: true, once: true });
+      setTimeout(() => window.removeEventListener('click', swallow, { capture: true }), 600);
+      finish.current();
+    };
     const evs = ['pointerdown', 'keydown', 'touchstart'];
-    evs.forEach((e) => window.addEventListener(e, skip, { capture: true }));
+    evs.forEach((e) => window.addEventListener(e, skip, { capture: true, passive: false }));
     return () => { timers.forEach(clearTimeout); evs.forEach((e) => window.removeEventListener(e, skip, { capture: true })); };
   }, [mode]);
 
