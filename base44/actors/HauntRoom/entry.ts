@@ -15,6 +15,7 @@ function sanitize(msg) {
     actionId: str(msg.actionId, LIMITS.actionIdMax),
     roundId: str(msg.roundId),
     objectId: str(msg.objectId),
+    sound: str(msg.sound, 16),
     value: typeof msg.value === 'boolean' ? msg.value : undefined,
   };
 }

@@ -13,7 +13,10 @@ export const BALANCE = {
   rippleMs: 1000,            // ripple on the abandoned object (client display)
   reconnectGraceMs: 10000,   // time to reclaim a seat before the match is abandoned
   emptyRoomExpireMs: 60000,  // a room with nobody connected expires after this
+  tauntCooldownMs: 10000,    // Ghost taunt cooldown
 };
+
+export const TAUNTS = ['creak', 'knock', 'breath', 'giggle'];
 
 export const LIMITS = {
   nameMax: 16,

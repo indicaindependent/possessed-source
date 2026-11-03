@@ -1,14 +1,15 @@
 // Pure, authoritative POSSESSED state machine. No I/O: the HauntRoom actor feeds it
 // wall-clock `now` and delivers the returned events. Every function returns a list of
 // { to: 'all' | 0 | 1, msg } envelopes addressed to SEATS (never to raw connections).
-import { BALANCE as B, OBJECT_IDS, ROOM_OF, LIMITS } from './possessedConfig.ts';
+import { BALANCE as B, OBJECT_IDS, ROOM_OF, LIMITS, TAUNTS } from './possessedConfig.ts';
 
 let rand = Math.random;
 export function setRandom(fn) { rand = fn; }
+export const random = () => rand();
 
 const OBJ = new Set(OBJECT_IDS);
 const IN_PLAY = new Set(['countdown', 'active', 'intermission']);
-const DEDUP = new Set(['investigate', 'possess', 'ready', 'rematch', 'back_to_lobby']);
+const DEDUP = new Set(['investigate', 'possess', 'ready', 'rematch', 'back_to_lobby', 'taunt']);
 
 const ev = (to, kind, extra = {}) => ({ to, msg: { type: 'ev', kind, ...extra } });
 
@@ -124,7 +125,7 @@ function setupRound(s, round, now) {
   Object.assign(s, {
     round, ghostSeat: round === 1 ? s.firstGhost : 1 - s.firstGhost,
     ghostObject: OBJECT_IDS[Math.floor(rand() * OBJECT_IDS.length) % OBJECT_IDS.length],
-    charges: B.startCharges, regenStart: null, moveReadyAt: B.startMoveReadyMs,
+    charges: B.startCharges, regenStart: null, moveReadyAt: B.startMoveReadyMs, tauntReadyAt: 0,
     activeElapsed: 0, runningSince: null, nextClue: 0, lastClue: null, paused: false,
     roundId: `m${s.matchNo}r${round}-${Math.floor(rand() * 1e9).toString(36)}`,
     phase: 'countdown', countdownEndsAt: now + B.countdownMs,
@@ -251,6 +252,19 @@ export function act(s, i, msg, now) {
       out.push(ev(hunterSeat(s), 'ripple', { objectId: from }));
       return out;
     }
+    case 'taunt': {
+      if (s.phase !== 'active') return reject('not_active');
+      if (s.paused) return reject('paused');
+      if (msg.roundId !== s.roundId) return reject('stale_round');
+      if (i !== s.ghostSeat) return reject('not_ghost');
+      if (!TAUNTS.includes(msg.sound)) return reject('bad_action');
+      const a = activeNow(s, now);
+      if (a < (s.tauntReadyAt ?? 0)) return reject('taunt_cooldown');
+      s.tauntReadyAt = a + B.tauntCooldownMs;
+      out.push(ev(hunterSeat(s), 'taunt', { sound: msg.sound }));
+      out.push(ev(i, 'taunted', { sound: msg.sound }));
+      return out;
+    }
     default:
       return reject('unknown');
   }
@@ -285,7 +299,7 @@ export function view(s, i, now) {
       seat: k, name: st.name, ready: st.ready, rematch: st.rematch, connected: st.connected,
       graceMs: !st.connected && st.graceUntil ? Math.max(0, st.graceUntil - now) : null,
     } : null)),
-    matchNo: s.matchNo, round: s.round, roundId: inRound ? s.roundId : null, role, ghostSeat: s.ghostSeat,
+    practice: !!s.practice, matchNo: s.matchNo, round: s.round, roundId: inRound ? s.roundId : null, role, ghostSeat: s.ghostSeat,
     clock: {
       activeMs: a, paused: s.paused, running: s.phase === 'active' && !s.paused,
       countdownMs: s.phase === 'countdown' && !s.paused ? Math.max(0, s.countdownEndsAt - now) : null,
@@ -296,10 +310,10 @@ export function view(s, i, now) {
     balance: {
       roundMs: B.roundMs, countdownMs: B.countdownMs, moveCooldownMs: B.moveCooldownMs, maxCharges: B.maxCharges,
       chargeRegenMs: B.chargeRegenMs, clueDurationMs: B.clueDurationMs, rippleMs: B.rippleMs, reconnectGraceMs: B.reconnectGraceMs,
-      clueTimesMs: B.clueTimesMs,
+      clueTimesMs: B.clueTimesMs, tauntCooldownMs: B.tauntCooldownMs,
     },
   };
-  if (inRound && role === 'ghost') v.ghost = { objectId: s.ghostObject, moveReadyInMs: Math.max(0, s.moveReadyAt - a) };
+  if (inRound && role === 'ghost') v.ghost = { objectId: s.ghostObject, moveReadyInMs: Math.max(0, s.moveReadyAt - a), tauntReadyInMs: Math.max(0, (s.tauntReadyAt ?? 0) - a) };
   if (inRound && role === 'hunter') {
     settleCharges(s, a);
     v.hunter = { charges: s.charges, regenElapsedMs: s.regenStart != null ? a - s.regenStart : null };
