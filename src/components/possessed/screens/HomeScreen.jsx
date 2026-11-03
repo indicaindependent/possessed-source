@@ -8,7 +8,7 @@ import SoundToggle from '@/components/possessed/screens/SoundToggle';
 import { searchMatch, useMatchmaker } from '@/lib/possessed/matchmaker';
 
 // Entry first: name + Quick Match + Play with a friend sit near the top at every size; the house is a backdrop.
-export default function HomeScreen({ initialCode = '', busy, error, onCreate, onJoin, onPractice, autoSearch = false, prefs }) {
+export default function HomeScreen({ initialCode = '', busy, error, onCreate, onJoin, onPractice, autoSearch = false, prefs, onReplayIntro }) {
   const [name, setName] = useState(() => sessionStorage.getItem('possessed:name') || '');
   const [joining, setJoining] = useState(Boolean(initialCode));
   const saveName = (v) => { setName(v); sessionStorage.setItem('possessed:name', v); };
@@ -42,6 +42,11 @@ export default function HomeScreen({ initialCode = '', busy, error, onCreate, on
           />
         </section>
         <HowToPlay />
+        {onReplayIntro && (
+          <button type="button" onClick={onReplayIntro} className="mx-auto mt-3 block font-body text-sm text-parchment/70 underline-offset-4 hover:text-parchment hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pumpkin lg:mx-0">
+            Replay the opening
+          </button>
+        )}
       </div>
       <div className="pointer-events-none relative z-0 h-[300px] w-full max-w-xl opacity-90 sm:h-[380px] lg:h-[560px] lg:max-w-none lg:flex-1 short:sticky short:top-3 short:h-[calc(100dvh-1.5rem)] short:flex-1" aria-hidden="true">
         <HauntedHouse decorative ambient className="h-full" />

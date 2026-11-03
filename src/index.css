@@ -248,24 +248,69 @@
 .countdown-num { animation: count-pop 1s ease-out; }
 @keyframes count-pop { from { transform: scale(1.5); opacity: 0; } 25% { transform: scale(1); opacity: 1; } to { opacity: .9; } }
 
-/* ---------- Opening cinematic: the house wakes up (4 s) ---------- */
-.intro-moon { opacity: 0; animation: intro-in .8s ease-out forwards; }
-.intro-fog { animation: intro-fog 4s linear forwards; }
-.intro-win-attic { opacity: 0; animation: intro-attic 1s .8s steps(1, end) forwards; }
-.intro-win-library { opacity: 0; animation: intro-library .6s 1.2s steps(1, end) forwards; }
-.intro-eyes { opacity: 0; transform-box: fill-box; transform-origin: center; animation: intro-eyes .8s 1.8s ease-in-out forwards; }
-.intro-letter { opacity: 0; animation: intro-rattle .35s ease-out forwards; }
-.intro-leave { animation: intro-out .6s ease-in forwards; }
-.intro-fade { animation: intro-out 1s ease-out forwards; }
+/* ---------- Opening cinematic: "The House Wakes" (12 s, act classes + CSS vars, transform/opacity only) ---------- */
 .intro-glow .intro-cta { animation: intro-cta 1.1s ease-out; }
 @keyframes intro-in { to { opacity: 1; } }
-@keyframes intro-out { to { opacity: 0; } }
-@keyframes intro-fog { from { transform: translateX(-12%); } to { transform: translateX(6%); } }
-@keyframes intro-attic { 0% { opacity: .9; } 20% { opacity: 0; } 45% { opacity: .9; } 65% { opacity: .15; } 100% { opacity: .8; } }
-@keyframes intro-library { 0% { opacity: .9; } 40% { opacity: 0; } 100% { opacity: .7; } }
-@keyframes intro-eyes { 0% { opacity: 0; } 20% { opacity: 1; transform: scaleY(1); } 50% { transform: scaleY(.1); } 65% { opacity: 1; transform: scaleY(1); } 100% { opacity: 0; } }
 @keyframes intro-rattle { 0% { opacity: 0; transform: translate(-3px, -6px) rotate(-6deg); } 40% { opacity: 1; transform: translate(3px, 2px) rotate(4deg); } 70% { transform: translate(-2px, 0) rotate(-2deg); } 100% { opacity: 1; transform: none; } }
 @keyframes intro-cta { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,173,66,0); } 40% { box-shadow: 0 0 22px 4px rgba(255,173,66,.55); } }
+
+.cine-root { transition: opacity .4s ease-out; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+.cine-root.act-out { opacity: 0; }
+.cine-root.cine-skip { opacity: 0; transition-duration: .25s; }
+.cine-cam { transform: scale(var(--cam, 1)); transform-origin: 26% 70%; will-change: transform; }
+.cine-flash { opacity: var(--flash, 0); }
+.cine-beam { transform: translateX(calc(var(--beam, -200) * 1%)); background: radial-gradient(closest-side, rgba(255,240,212,.55), rgba(255,240,212,.18) 60%, transparent); }
+.cine-vignette { background: radial-gradient(ellipse at 50% 55%, transparent 45%, rgba(8,6,14,.85) 100%); }
+.cine-title { font-size: clamp(2.6rem, 13vw, 5rem); line-height: 1; }
+.cine-hint { opacity: 0; transition: opacity .6s; }
+.act-hint .cine-hint { opacity: .6; }
+.act-out .cine-hint, .act-title .cine-hint { opacity: 0; }
+
+.intro-star { opacity: 0; }
+.act-stars .intro-star { animation: intro-star 1.4s ease-out both; }
+@keyframes intro-star { 0% { opacity: 0; } 60% { opacity: .95; } 100% { opacity: .65; } }
+.cine-moon { opacity: 0; transition: opacity 1.6s ease-out; }
+.act-moon .cine-moon { opacity: 1; }
+.cine-fog { opacity: 0; transition: opacity 2s ease-out; }
+.act-moon .cine-fog { opacity: 1; }
+.cine-fog-a { animation: cine-fog 18s linear infinite alternate; }
+.cine-fog-b { animation: cine-fog 11s linear infinite alternate-reverse; }
+@keyframes cine-fog { from { transform: translateX(0); } to { transform: translateX(-40%); } }
+
+.intro-letter { opacity: 0; }
+.act-title .intro-letter { animation: intro-rattle .35s ease-out both; }
+.intro-char { opacity: 0; }
+.act-tag .intro-char { animation: intro-in .01s both; }
+
+/* The house as a stage: windows dark, no idle loops; acts bring single props to life. */
+.cine .idle, .cine .blink, .cine .portrait-eyes { animation: none; }
+.cine .candle-glow { opacity: 0; animation: none; transition: opacity .6s ease-out; }
+.act-warm .cine [data-room="parlor"] .candle-glow { opacity: 1; }
+.cine [data-prop="portrait"] .blink { transform: scaleY(.1); transition: transform .18s; }
+.cine [data-prop="portrait"] .portrait-eyes { transition: transform .5s ease-out; }
+.act-eyes .cine [data-prop="portrait"] .blink { transform: scaleY(1); }
+.act-eyes .cine [data-prop="portrait"] .portrait-eyes { transform: translateX(-2.5px); }
+.act-rock .cine [data-prop="rocking_chair"] .idle { animation: cine-rock 1.1s ease-in-out infinite; }
+.act-freeze .cine [data-prop="rocking_chair"] .idle { animation-play-state: paused; }
+.act-freeze .cine [data-prop="portrait"] .blink { transform: scaleY(.1); transition: none; }
+.act-reopen .cine [data-prop="portrait"] .blink { transform: scaleY(1); transition: transform .3s; }
+.act-reopen .cine [data-prop="rocking_chair"] .idle { animation: cine-rock-once 2.2s ease-in-out 1 both; }
+@keyframes cine-rock { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+@keyframes cine-rock-once { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(-4deg); } 70% { transform: rotate(4deg); } }
+.act-pull .cine .candle-glow { animation: win-ripple .26s ease-in-out both; transition: none; }
+.act-pull .cine [data-room="library"] .candle-glow { animation-delay: 80ms; }
+.act-pull .cine [data-room="parlor"] .candle-glow { animation-delay: 160ms; }
+.act-pull .cine [data-room="kitchen"] .candle-glow { animation-delay: 240ms; }
+@keyframes win-ripple { 0% { opacity: 0; } 25% { opacity: 1; } 50% { opacity: .35; } 75% { opacity: 1; } 100% { opacity: 0; } }
+
+/* Reduced-motion cut: three cross-faded stills (fades survive the global reduced-motion clamp). */
+.cine-reduced .cine-stage-house, .cine-reduced .cine-title-wrap { transition: opacity .6s ease-out !important; }
+.cine-reduced .cine-stage-house { opacity: .55; }
+.cine-reduced.act-still2 .cine-stage-house { opacity: 1; }
+.cine-reduced.act-still3 .cine-stage-house { opacity: .3; }
+.cine-reduced .cine-title-wrap { opacity: 0; }
+.cine-reduced.act-still3 .cine-title-wrap { opacity: 1; }
+.cine-reduced .intro-letter, .cine-reduced .intro-char { animation: none !important; opacity: 1; }
 
 /* ---------- In a room: no continuous decorative loops (SVG repaints compete with input) ---------- */
 .calm .intro-cta, .calm .idle, .calm .blink, .calm .fog, .calm .fog-slow, .calm .portrait-eyes, .calm .glint { animation: none !important; }

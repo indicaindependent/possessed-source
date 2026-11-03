@@ -4,7 +4,7 @@ import RoomView from '@/components/possessed/room/RoomView';
 import useFeedback from '@/lib/possessed/useFeedback';
 import usePrefs from '@/lib/possessed/usePrefs';
 import { fixtureView } from '@/lib/possessed/fixtures';
-import IntroScene from '@/components/possessed/intro/IntroScene';
+import IntroOverlay from '@/components/possessed/intro/IntroOverlay';
 
 const noop = () => {};
 const fakeAct = () => ({ ok: true });
@@ -16,7 +16,12 @@ export default function DevFixture() {
   const view = useMemo(() => fixtureView(q.get('phase') || 'active', q.get('role') || 'hunter'), []);
   const fb = useFeedback();
   const prefs = usePrefs();
-  if (q.get('phase') === 'intro') return <div className="relative h-[100dvh] bg-ink"><IntroScene /></div>;
+  // phase=intro&t=<ms> freezes the timeline at t; &rm=1 = reduced cut; &gate=1 shows the gate.
+  if (q.get('phase') === 'intro') {
+    const t = q.get('t');
+    const frozen = q.get('gate') === '1' || t == null ? null : Number(t);
+    return <><NightSky /><IntroOverlay mode={q.get('rm') === '1' ? 'fade' : 'full'} replay={q.get('gate') !== '1'} frozen={frozen} onDone={noop} /></>;
+  }
   return (
     <div className="calm">
       <NightSky />

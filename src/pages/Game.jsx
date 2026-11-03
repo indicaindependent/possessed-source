@@ -67,17 +67,23 @@ export default function Game() {
     storage: window.localStorage, search: window.location.search, pathname: window.location.pathname,
     reducedMotion: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
   }));
+  const [replay, setReplay] = useState(false);
   const [glow, setGlow] = useState(false);
+  const replayIntro = useCallback(() => {
+    setReplay(true);
+    setIntro(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'fade' : 'full');
+  }, []);
   const endIntro = useCallback(() => {
     markIntroSeen(window.localStorage);
     setIntro('none');
+    setReplay(false);
     setGlow(true);
     setTimeout(() => setGlow(false), 1200);
   }, []);
 
   return (
     <div className={[session ? 'calm' : '', glow ? 'intro-glow' : ''].join(' ').trim() || undefined}>
-      {!session && intro !== 'none' && <IntroOverlay mode={intro} onDone={endIntro} />}
+      {!session && intro !== 'none' && <IntroOverlay key={replay ? 'replay' : 'first'} mode={intro} replay={replay} onDone={endIntro} />}
       <NightSky />
       {session ? (
         <RoomScreen session={session} prefs={prefs} onFatal={onFatal} onSeated={onSeated} onExit={() => exit()}
@@ -88,6 +94,7 @@ export default function Game() {
       ) : (
         <HomeScreen
           prefs={prefs}
+          onReplayIntro={replayIntro}
           initialCode={initialCode}
           error={error}
           autoSearch={autoSearch}
