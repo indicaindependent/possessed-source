@@ -3,7 +3,7 @@ import ConnectionBadge from '@/components/possessed/room/ConnectionBadge';
 import IconToggle from '@/components/possessed/room/IconToggle';
 import LeaveButton from '@/components/possessed/room/LeaveButton';
 
-export default function TopBar({ code, status, prefs, onLeave, confirmLeave = false }) {
+export default function TopBar({ code, status, latency = null, prefs, onLeave, confirmLeave = false }) {
   return (
     <header className="mx-auto flex w-full max-w-6xl shrink-0 items-center gap-2 px-2 pt-2 sm:gap-3 sm:px-4 short:pt-1">
       <span className="title-emboss hidden font-display text-2xl font-black tracking-tight text-parchment sm:inline short:text-xl">Possessed</span>
@@ -11,6 +11,9 @@ export default function TopBar({ code, status, prefs, onLeave, confirmLeave = fa
         {code}
       </span>
       <ConnectionBadge status={status} />
+      {status === 'online' && latency != null && (
+        <span className="hidden text-xs font-bold tabular-nums text-parchment/70 sm:inline">{latency} ms to the house</span>
+      )}
       <div className="ml-auto flex items-center gap-1.5">
         <IconToggle icon={prefs.muted ? VolumeX : Volume2} label={prefs.muted ? 'Sound is off. Turn sound on' : 'Sound is on. Mute'} pressed={!prefs.muted} onClick={prefs.toggleMute} />
         <LeaveButton confirm={confirmLeave} onLeave={onLeave} />

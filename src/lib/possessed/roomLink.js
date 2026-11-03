@@ -12,7 +12,7 @@ export const ACK_TIMEOUT_MS = 5000;
 const BACKOFF_MS = [2000, 4000, 8000, 16000, 30000];
 
 export function createRoomLink({
-  ref, connId, hello, onState, onEvent, onFatal, onStatus, onPending,
+  ref, connId, hello, onState, onEvent, onFatal, onStatus, onPending, onLatency,
   now = () => Date.now(), log = () => {}, newId = () => crypto.randomUUID().slice(0, 18),
 }) {
   let conn = null;
@@ -59,6 +59,7 @@ export function createRoomLink({
     } else if (msg.type === 'pong') {
       if (msg.seated === false) sayHello();
       else if (seated) setStatus('online');
+      if (typeof msg.t === 'number') onLatency?.(Math.max(0, Math.round(now() - msg.t)));
     } else if (msg.type === 'error') {
       if (msg.code === 'not_seated') { sayHello(); return; }
       fatal = true;
@@ -97,7 +98,7 @@ export function createRoomLink({
       if (pending && t - pending.sentAt > ACK_TIMEOUT_MS) settle('timeout');
       if (!visible) { awaitingSince = null; return; }
       if (t - lastProbe >= PROBE_MS) {
-        conn?.send({ type: 'ping' });
+        conn?.send({ type: 'ping', t });
         lastProbe = t;
         if (awaitingSince == null) awaitingSince = t;
       }

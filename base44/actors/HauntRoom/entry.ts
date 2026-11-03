@@ -171,7 +171,7 @@ export default class HauntRoom extends Actor {
     // Self-heal: a message proves this seat's socket is alive (covers close/connect reordering).
     const heal = this.s.seats[i].connected ? [] : G.reconnect(this.s, i, now);
     if (msg.type === 'ping') {
-      conn.send({ type: 'pong', seated: true });
+      conn.send({ type: 'pong', seated: true, ...(typeof msg.t === 'number' && Number.isFinite(msg.t) ? { t: msg.t } : {}) });
       if (heal.length) await this.commit(heal);
       return;
     }

@@ -11,6 +11,7 @@ export default function useHauntRoom(session, { onEvent, onFatal, onSeated, onSe
   const [view, setView] = useState(null);
   const [status, setStatus] = useState('connecting');
   const [pending, setPending] = useState(null);
+  const [latency, setLatency] = useState(null);
   const linkRef = useRef(null);
   const cb = useRef({});
   cb.current = { onEvent, onFatal, onSeated, onSettled, intent: session?.intent, name: session?.name };
@@ -36,6 +37,7 @@ export default function useHauntRoom(session, { onEvent, onFatal, onSeated, onSe
         if (s === 'online' && lost) { lost = false; toast({ title: 'Reconnected', description: 'You are back in the haunt.', duration: 2500 }); }
       },
       onPending: (p, done) => { setPending(p); if (done) cb.current.onSettled?.(done); },
+      onLatency: setLatency,
       log: devLog,
     });
     linkRef.current = link;
@@ -51,11 +53,12 @@ export default function useHauntRoom(session, { onEvent, onFatal, onSeated, onSe
       setView(null);
       setStatus('connecting');
       setPending(null);
+      setLatency(null);
     };
   }, [code]);
 
   const act = useCallback((type, payload) => linkRef.current?.act(type, payload) ?? { ok: false, reason: 'offline' }, []);
   const leave = useCallback(() => linkRef.current?.leave(), []);
 
-  return { view, status, pending, act, leave };
+  return { view, status, pending, latency, act, leave };
 }

@@ -13,7 +13,7 @@ import PracticeChip from '@/components/possessed/room/PracticeChip';
 import ArrivedOffer from '@/components/possessed/room/ArrivedOffer';
 
 // Pure room layout (no socket): playing = HUD + full house; otherwise panel first, house as context.
-export default function RoomView({ view, status, pending, act, fb, prefs, onLeave, onNewHaunt, quick = false, onFindNew, onFace = null }) {
+export default function RoomView({ view, status, latency = null, pending, act, fb, prefs, onLeave, onNewHaunt, quick = false, onFindNew, onFace = null }) {
   const playing = view.phase === 'countdown' || view.phase === 'active';
   const propStates = usePropStates(view, fb.marks, pending, fb.memory);
   const onPick = usePick(view, act, fb.say);
@@ -22,7 +22,7 @@ export default function RoomView({ view, status, pending, act, fb, prefs, onLeav
   return (
     <div className={`flex h-[100dvh] flex-col ${playing ? 'overflow-hidden overscroll-none' : 'overflow-y-auto'} pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)]`}>
       <p className="sr-only" aria-live="polite" aria-atomic="true">{fb.announce.text}</p>
-      <TopBar code={view.code} status={status} prefs={prefs} onLeave={onLeave} confirmLeave={playing} />
+      <TopBar code={view.code} status={status} latency={latency} prefs={prefs} onLeave={onLeave} confirmLeave={playing} />
       {view.practice && <PracticeChip />}
       {onFace && (view.phase === 'intermission' || view.phase === 'final' || view.phase === 'lobby') && (
         <div className="mx-1.5 mt-1.5 sm:mx-auto sm:w-full sm:max-w-md"><ArrivedOffer onFace={onFace} /></div>

@@ -1,10 +1,11 @@
 import { useMatchmaker } from '@/lib/possessed/matchmaker';
 
-function line({ online, searching, matches }) {
-  if (online <= 1 && searching === 0) return "You're the first one here. Start a Quick Match and we'll pair you when someone joins, or invite a friend.";
+function line({ online, searching, matches, practice }) {
+  if (online <= 1 && searching === 0 && !matches && !practice) return "You're the first one here. Start a Quick Match and we'll pair you when someone joins, or invite a friend.";
   const parts = [`${online} online`, `${searching} searching`];
-  if (matches != null) parts.push(`${matches} ${matches === 1 ? 'match' : 'matches'} in progress`);
-  return parts.join(', ');
+  if (matches != null) parts.push(`${matches} ${matches === 1 ? 'match' : 'matches'}`);
+  if (practice) parts.push(`${practice} haunting the House`);
+  return `Right now: ${parts.join(', ')}`;
 }
 
 // Only this line re-renders on count changes. Fixed height: appearing/updating never reflows Home.
