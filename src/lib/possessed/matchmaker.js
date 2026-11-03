@@ -1,10 +1,11 @@
 import { useSyncExternalStore } from 'react';
 import { base44 } from '@/api/base44Client';
 
-// One Matchmaker socket while the Home screen is mounted. State lives in a tiny external
-// store so the live counts re-render only the components that show them.
+// One Matchmaker socket for the whole game (home and rooms), so a search keeps running during
+// practice. State lives in a tiny external store so counts re-render only what shows them.
 const PING_MS = 10000;
 const COUNTS_STALE_MS = 25000;
+const REATTACH_MS = 40000;
 const QUEUE_TIMEOUT_MS = 8000;
 
 let state = { counts: null, search: 'idle', since: null, error: null };
@@ -13,6 +14,7 @@ let sub = null;
 let timer = null;
 let countsAt = 0;
 let requestedAt = 0;
+let attachedAt = 0;
 let onMatch = null;
 const listeners = new Set();
 
@@ -21,12 +23,14 @@ function set(patch) {
   listeners.forEach((l) => l());
 }
 
+const num = (v) => (Number.isFinite(v) ? v : null);
+
 function receive(msg) {
   if (!msg || typeof msg !== 'object') return;
   if (msg.type === 'counts') {
     countsAt = Date.now();
-    const { online, searching, matches } = msg;
-    if ([online, searching].every(Number.isFinite)) set({ counts: { online, searching, matches: Number.isFinite(matches) ? matches : null } });
+    const { online, searching } = msg;
+    if ([online, searching].every(Number.isFinite)) set({ counts: { online, searching, matches: num(msg.matches), practice: num(msg.practice) } });
   } else if (msg.type === 'queued') {
     if (state.search === 'requesting') set({ search: 'searching', since: Date.now(), error: null });
   } else if (msg.type === 'cancelled') {
@@ -39,20 +43,36 @@ function receive(msg) {
   }
 }
 
+function attach() {
+  conn = base44.actors.Matchmaker('global').connect({ id: crypto.randomUUID() });
+  sub = conn.subscribe(receive);
+  attachedAt = Date.now();
+  conn.send({ type: 'ping' });
+  if (state.search !== 'idle') { requestedAt = Date.now(); conn.send({ type: 'search' }); }
+}
+
+function detach() {
+  sub?.unsubscribe();
+  conn?.close();
+  conn = null; sub = null;
+}
+
 function tick() {
   const now = Date.now();
   if (state.counts && now - countsAt > COUNTS_STALE_MS) set({ counts: null }); // unreachable: hide, never show stale
+  // A socket that closed for good never answers again: reattach (and re-queue if searching).
+  if (now - Math.max(countsAt, attachedAt) > REATTACH_MS) { detach(); attach(); }
   if (state.search === 'requesting' && now - requestedAt > QUEUE_TIMEOUT_MS) {
     set({ search: 'idle', error: "Couldn't reach matchmaking. Check your connection and try again." });
   }
 }
 
+export function setMatchHandler(fn) { onMatch = fn; }
+
 export function openMatchmaker(handleMatch) {
   onMatch = handleMatch;
   if (conn) return closeMatchmaker;
-  conn = base44.actors.Matchmaker('global').connect({ id: crypto.randomUUID() });
-  sub = conn.subscribe(receive);
-  conn.send({ type: 'ping' });
+  attach();
   let last = Date.now();
   timer = setInterval(() => {
     tick();
@@ -64,9 +84,8 @@ export function openMatchmaker(handleMatch) {
 // Closing the socket removes this tab from the queue on the server right away.
 export function closeMatchmaker() {
   clearInterval(timer);
-  sub?.unsubscribe();
-  conn?.close();
-  conn = null; sub = null; timer = null; onMatch = null;
+  detach();
+  timer = null; onMatch = null;
   state = { counts: null, search: 'idle', since: null, error: null };
 }
 
@@ -78,6 +97,7 @@ export function searchMatch() {
 }
 
 export function cancelMatch() {
+  if (state.search === 'idle') return;
   conn?.send({ type: 'cancel' });
   set({ search: 'idle', since: null });
 }
