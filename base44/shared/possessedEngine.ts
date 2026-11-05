@@ -2,6 +2,7 @@
 // wall-clock `now` and delivers the returned events. Every function returns a list of
 // { to: 'all' | 0 | 1, msg } envelopes addressed to SEATS (never to raw connections).
 import { BALANCE as B, OBJECT_IDS, ROOMS, ROOM_OF, LIMITS, TAUNTS } from './possessedConfig.ts';
+import { housePolicy, normalizeDifficulty } from './possessedDifficulty.ts';
 
 let rand = Math.random;
 export function setRandom(fn) { rand = fn; }
@@ -28,10 +29,13 @@ export const hunterSeat = (s) => (s.ghostSeat == null ? null : 1 - s.ghostSeat);
 export const activeNow = (s, now) =>
   s.activeElapsed + (s.runningSince != null ? Math.max(0, now - s.runningSince) : 0);
 
+// Difficulty affects The House's charges only; human Hunter rules stay unchanged.
+export const chargeRegenMs = (s) => s.practice && hunterSeat(s) === 1 ? housePolicy(s.practiceLevel).chargeRegenMs : B.chargeRegenMs;
 export function settleCharges(s, a) {
-  while (s.regenStart != null && s.charges < B.maxCharges && a - s.regenStart >= B.chargeRegenMs) {
+  const interval = chargeRegenMs(s);
+  while (s.regenStart != null && s.charges < B.maxCharges && a - s.regenStart >= interval) {
     s.charges += 1;
-    s.regenStart += B.chargeRegenMs;
+    s.regenStart += interval;
   }
   if (s.charges >= B.maxCharges) { s.charges = B.maxCharges; s.regenStart = null; }
 }
@@ -147,11 +151,12 @@ function setupRound(s, round, now) {
   Object.assign(s, {
     round, ghostSeat: round === 1 ? s.firstGhost : 1 - s.firstGhost,
     ghostObject: OBJECT_IDS[Math.floor(rand() * OBJECT_IDS.length) % OBJECT_IDS.length],
-    charges: B.startCharges, regenStart: null, moveReadyAt: B.startMoveReadyMs, tauntReadyAt: 0,
+    charges: B.startCharges, regenStart: null, moveReadyAt: B.startMoveReadyMs, tauntReadyAt: 0, tauntsFired: 0,
     activeElapsed: 0, runningSince: null, nextClue: 0, lastClue: null, paused: false, nextStirAt: B.stillPressureMs, searchedIds: [],
     roundId: `m${s.matchNo}r${round}-${Math.floor(rand() * 1e9).toString(36)}`,
     phase: 'countdown', countdownEndsAt: now + B.countdownMs,
   });
+  s.possessionPath = [{ object: s.ghostObject, room: ROOM_OF[s.ghostObject], fromMs: 0, toMs: null }];
   resetFlags(s);
   return [ev('all', 'round_setup', { round })];
 }
@@ -176,6 +181,8 @@ function endRound(s, outcome, survivalMs) {
     round: s.round, ghostSeat: s.ghostSeat, ghostName: s.seats[s.ghostSeat]?.name ?? 'Ghost',
     outcome, survivalMs: Math.round(survivalMs), hidingObject: s.ghostObject, hidingRoom: ROOM_OF[s.ghostObject],
     searched: [...(s.searchedIds || [])],
+    tauntsFired: s.tauntsFired || 0,
+    path: (s.possessionPath || []).map((stop, index, path) => ({ ...stop, toMs: index === path.length - 1 ? Math.round(survivalMs) : stop.toMs })),
   };
   s.results.push(result);
   Object.assign(s, { activeElapsed: survivalMs, runningSince: null, ghostObject: null, paused: false });
@@ -187,7 +194,15 @@ function endRound(s, outcome, survivalMs) {
     const ms = [0, 1].map((k) => s.results.find((r) => r.ghostSeat === k)?.survivalMs ?? 0);
     s.history = [...(s.history || []), { match: s.matchNo, ms }].slice(-5);
   }
-  return [ev('all', 'round_end', { result })];
+  return [ev('all', 'round_end', { result: withoutPath(result) }), ...resultEvents(s)];
+}
+
+const withoutPath = ({ path: _path, ...result }) => result;
+// Reveals travel only on these result events, including resyncs after a reconnect.
+export function resultEvents(s) {
+  if (s.phase === 'intermission') return [ev('all', 'round_result', { matchNo: s.matchNo, result: s.results[0] })];
+  if (s.phase === 'final') return [ev('all', 'final', { matchNo: s.matchNo, results: s.results })];
+  return [];
 }
 
 export function advance(s, now) {
@@ -280,6 +295,9 @@ export function act(s, i, msg, now) {
       if (msg.objectId === s.ghostObject) return reject('same_object');
       if (a < s.moveReadyAt) return reject('cooldown');
       const from = s.ghostObject;
+      const path = s.possessionPath || (s.possessionPath = [{ object: from, room: ROOM_OF[from], fromMs: 0, toMs: null }]);
+      path[path.length - 1].toMs = Math.round(a);
+      path.push({ object: msg.objectId, room: ROOM_OF[msg.objectId], fromMs: Math.round(a), toMs: null });
       s.ghostObject = msg.objectId;
       s.moveReadyAt = a + moveCooldownAt(a);
       s.nextStirAt = a + B.stillPressureMs;
@@ -296,6 +314,7 @@ export function act(s, i, msg, now) {
       const a = activeNow(s, now);
       if (a < (s.tauntReadyAt ?? 0)) return reject('taunt_cooldown');
       s.tauntReadyAt = a + B.tauntCooldownMs;
+      s.tauntsFired = (s.tauntsFired || 0) + 1;
       out.push(ev(hunterSeat(s), 'taunt', { sound: msg.sound }));
       out.push(ev(i, 'taunted', { sound: msg.sound }));
       return out;
@@ -334,17 +353,19 @@ export function view(s, i, now) {
       seat: k, name: st.name, ready: st.ready, rematch: st.rematch, connected: st.connected,
       graceMs: !st.connected && st.graceUntil ? Math.max(0, st.graceUntil - now) : null,
     } : null)),
-    practice: !!s.practice, matchNo: s.matchNo, round: s.round, roundId: inRound ? s.roundId : null, role, ghostSeat: s.ghostSeat,
+    practice: !!s.practice, practiceLevel: s.practice ? normalizeDifficulty(s.practiceLevel) : null,
+    recordId: s.phase === 'final' ? `${s.code}:${s.roundId}` : null,
+    matchNo: s.matchNo, round: s.round, roundId: inRound ? s.roundId : null, role, ghostSeat: s.ghostSeat,
     clock: {
       activeMs: a, paused: s.paused, running: s.phase === 'active' && !s.paused,
       countdownMs: s.phase === 'countdown' && !s.paused ? Math.max(0, s.countdownEndsAt - now) : null,
     },
     nextClueAtMs: s.phase === 'active' ? (B.clueTimesMs[s.nextClue] ?? null) : null,
     lastClue: inRound ? s.lastClue : null,
-    results: s.results, winner: s.winner, notice: s.notice, abandonedBy: s.abandonedBy, history: s.history || [],
+    results: s.results.map(withoutPath), winner: s.winner, notice: s.notice, abandonedBy: s.abandonedBy, history: s.history || [],
     balance: {
       roundMs: B.roundMs, countdownMs: B.countdownMs, moveCooldownMs: B.moveCooldownMs, maxCharges: B.maxCharges,
-      chargeRegenMs: B.chargeRegenMs, clueDurationMs: B.clueDurationMs, rippleMs: B.rippleMs, reconnectGraceMs: B.reconnectGraceMs,
+      chargeRegenMs: chargeRegenMs(s), clueDurationMs: B.clueDurationMs, rippleMs: B.rippleMs, reconnectGraceMs: B.reconnectGraceMs,
       clueTimesMs: B.clueTimesMs, tauntCooldownMs: B.tauntCooldownMs,
     },
   };

@@ -98,7 +98,7 @@ export default function Game() {
           initialCode={initialCode}
           error={error}
           autoSearch={autoSearch}
-          onPractice={(name) => begin({ code: generateCode(), intent: 'practice', practice: true, name, attempt: 0 })}
+          onPractice={(name, level = 'haunted') => begin({ code: generateCode(), intent: 'practice', practice: true, level, name, attempt: 0 })}
           onCreate={(name) => { cancelMatch(); begin({ code: generateCode(), intent: 'create', name, attempt: 0 }); }}
           onJoin={(code, name) => { cancelMatch(); begin({ code, intent: 'join', name }); }}
         />

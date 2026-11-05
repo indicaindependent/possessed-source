@@ -5,6 +5,7 @@ import { instanceIdFor } from '@/lib/possessed/roomCode';
 import { connIdFor } from '@/lib/possessed/session';
 import { createRoomLink, TICK_MS } from '@/lib/possessed/roomLink';
 import { devLog } from '@/lib/possessed/devlog';
+import resultReveals from '@/lib/possessed/resultReveals';
 
 // Exactly one live link per mounted room. Callbacks live in a ref so renders never reconnect.
 export default function useHauntRoom(session, { onEvent, onFatal, onSeated, onSettled }) {
@@ -14,22 +15,23 @@ export default function useHauntRoom(session, { onEvent, onFatal, onSeated, onSe
   const [latency, setLatency] = useState(null);
   const linkRef = useRef(null);
   const cb = useRef({});
-  cb.current = { onEvent, onFatal, onSeated, onSettled, intent: session?.intent, name: session?.name };
+  cb.current = { onEvent, onFatal, onSeated, onSettled, intent: session?.intent, name: session?.name, level: session?.level };
   const code = session?.code;
 
   useEffect(() => {
     if (!code) return undefined;
     let seated = false;
     let lost = false;
+    const reveals = resultReveals();
     const link = createRoomLink({
       ref: base44.actors.HauntRoom(instanceIdFor(code)),
       connId: connIdFor(code),
-      hello: () => ({ type: 'hello', intent: cb.current.intent, name: cb.current.name }),
+      hello: () => ({ type: 'hello', intent: cb.current.intent, name: cb.current.name, level: cb.current.level }),
       onState: (msg) => {
         if (!seated) { seated = true; cb.current.onSeated?.(); }
-        setView({ ...msg, receivedAt: performance.now() });
+        setView({ ...reveals.attach(msg), receivedAt: performance.now() });
       },
-      onEvent: (msg) => cb.current.onEvent?.(msg),
+      onEvent: (msg) => { reveals.receive(msg); cb.current.onEvent?.(msg); },
       onFatal: (c) => cb.current.onFatal?.(c),
       onStatus: (s) => {
         setStatus(s);

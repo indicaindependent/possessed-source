@@ -1,11 +1,12 @@
 import { Repeat } from 'lucide-react';
 import RoundResult from '@/components/possessed/room/RoundResult';
+import HauntingReveal from '@/components/possessed/room/HauntingReveal';
 import SeatList from '@/components/possessed/room/SeatList';
 import BigButton from '@/components/possessed/room/BigButton';
 import PrimaryAction from '@/components/possessed/room/PrimaryAction';
 import { nextRoundGoal } from '@/lib/possessed/format';
 
-export default function IntermissionPanel({ view, act, pending }) {
+export default function IntermissionPanel({ view, act, pending, reducedMotion }) {
   const r = view.results?.[0];
   if (!r) return null;
   const me = view.seats[view.you];
@@ -14,6 +15,7 @@ export default function IntermissionPanel({ view, act, pending }) {
     <div className="space-y-3">
       <h2 className="title-emboss font-display text-2xl font-black tracking-tight text-parchment">Round 1 complete</h2>
       <RoundResult r={r} you={view.you} />
+      <HauntingReveal results={[r]} reducedMotion={reducedMotion} />
       <div className="flex items-start gap-3 rounded-xl border border-spectral/40 bg-spectral/5 p-3">
         <Repeat className="mt-0.5 h-5 w-5 shrink-0 text-spectral" aria-hidden="true" />
         <div>

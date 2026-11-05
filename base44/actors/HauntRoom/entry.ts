@@ -4,6 +4,7 @@ import * as G from '../../shared/possessedEngine.ts';
 import { identityKey, createLimiter } from '../../shared/possessedActorUtil.ts';
 import { reportMatch } from '../../shared/liveMatches.ts';
 import { botDecide, BOT_SEAT } from '../../shared/possessedBot.ts';
+import { normalizeDifficulty } from '../../shared/possessedDifficulty.ts';
 
 // Practice ("The House") seat: no socket, never disconnects, auto-readies and auto-rematches.
 export const BOT_CONN = 'bot:house';
@@ -69,6 +70,7 @@ export default class HauntRoom extends Actor {
 
   sendViews() {
     const now = Date.now();
+    this.deliver(G.resultEvents(this.s));
     for (let i = 0; i < 2; i++) this.connFor(i)?.send(G.view(this.s, i, now));
   }
 
@@ -196,7 +198,7 @@ export default class HauntRoom extends Actor {
       if (intent === 'join') { conn.send({ type: 'error', code: 'not_found' }); return; }
       this.s = G.newState(code);
       if (intent === 'quick') this.s.quick = true;
-      if (intent === 'practice') this.s.practice = true;
+      if (intent === 'practice') { this.s.practice = true; this.s.practiceLevel = normalizeDifficulty(str(msg.level, 16)); }
     } else {
       const existing = G.seatOf(this.s, conn.id);
       if (existing >= 0) {

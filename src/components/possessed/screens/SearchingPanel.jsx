@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Home, Loader2, UserPlus } from 'lucide-react';
 import { useMatchmaker, cancelMatch } from '@/lib/possessed/matchmaker';
 import Elapsed from '@/components/possessed/screens/Elapsed';
+import HouseDifficulty from '@/components/possessed/screens/HouseDifficulty';
 
 function OthersSearching() {
   const searching = useMatchmaker((s) => s.counts?.searching);
@@ -10,7 +11,7 @@ function OthersSearching() {
   return <p className="text-sm font-bold text-parchment/75">{others === 0 ? 'No one else is in the queue yet.' : `${others} other ${others === 1 ? 'player is' : 'players are'} searching.`}</p>;
 }
 
-export default function SearchingPanel({ since, onInvite, onPractice }) {
+export default function SearchingPanel({ since, onInvite, onPractice, level, onLevelChange }) {
   const [long, setLong] = useState(false);
   const [waited, setWaited] = useState(false);
   const searching = useMatchmaker((s) => s.counts?.searching);
@@ -25,10 +26,13 @@ export default function SearchingPanel({ since, onInvite, onPractice }) {
       </p>
       <OthersSearching />
       {lonely && onPractice && (
-        <button type="button" onClick={onPractice}
-          className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-spectral px-3 py-2 text-sm font-extrabold text-ink focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-parchment sm:text-base">
-          <Home className="h-4 w-4 shrink-0" aria-hidden="true" /> No one else is here yet. Play the House while you wait?
-        </button>
+        <div className="space-y-2">
+          <HouseDifficulty value={level} onChange={onLevelChange} />
+          <button type="button" onClick={() => onPractice(level)}
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-spectral px-3 py-2 text-sm font-extrabold text-ink focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-parchment sm:text-base">
+            <Home className="h-4 w-4 shrink-0" aria-hidden="true" /> No one else is here yet. Play the House while you wait?
+          </button>
+        </div>
       )}
       <div className={`grid gap-2 ${long ? 'grid-cols-2' : 'grid-cols-1'}`}>
         <button type="button" onClick={cancelMatch}

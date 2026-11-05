@@ -1,13 +1,15 @@
+import { useState } from 'react';
 import { Loader2, Zap } from 'lucide-react';
 import { useMatchmaker, searchMatch } from '@/lib/possessed/matchmaker';
 import SearchingPanel from '@/components/possessed/screens/SearchingPanel';
 import PracticeButton from '@/components/possessed/screens/PracticeButton';
 
 export default function QuickMatch({ search, onInvite, onPractice }) {
+  const [level, setLevel] = useState('haunted');
   const since = useMatchmaker((s) => s.since);
   const error = useMatchmaker((s) => s.error);
   const waiting = useMatchmaker((s) => s.counts?.searching);
-  if (search === 'searching') return <SearchingPanel since={since} onInvite={onInvite} onPractice={onPractice} />;
+  if (search === 'searching') return <SearchingPanel since={since} onInvite={onInvite} onPractice={onPractice} level={level} onLevelChange={setLevel} />;
   const busy = search === 'requesting';
   return (
     <div className="space-y-2">
@@ -19,7 +21,7 @@ export default function QuickMatch({ search, onInvite, onPractice }) {
       </button>
       <p className="text-center text-[13px] font-bold text-parchment/75">Get paired with the next real player. One hides, one hunts, then you swap.</p>
       {error && <p role="alert" className="text-sm font-bold text-pumpkin">{error}</p>}
-      {onPractice && <PracticeButton onPractice={onPractice} disabled={busy} />}
+      {onPractice && <PracticeButton onPractice={onPractice} disabled={busy} level={level} onLevelChange={setLevel} />}
     </div>
   );
 }

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import HauntedHouse from '@/components/possessed/house/HauntedHouse';
 import JoinPanel from '@/components/possessed/screens/JoinPanel';
 import HowToPlay from '@/components/possessed/screens/HowToPlay';
+import ScreenComparison from '@/components/possessed/screens/ScreenComparison';
+import HauntRecord from '@/components/possessed/screens/HauntRecord';
 import LivePresence from '@/components/possessed/screens/LivePresence';
 import QuickMatch from '@/components/possessed/screens/QuickMatch';
 import { searchMatch, useMatchmaker } from '@/lib/possessed/matchmaker';
@@ -34,10 +36,12 @@ export default function HomeScreen({ initialCode = '', busy, error, onCreate, on
             initialCode={initialCode} busy={busy} error={error}
             onCreate={() => onCreate(name.trim())} onJoin={(code) => onJoin(code, name.trim())}
             searching={search !== 'idle'}
-            quick={<QuickMatch search={search} onInvite={() => onCreate(name.trim())} onPractice={() => onPractice(name.trim())} />}
+            quick={<QuickMatch search={search} onInvite={() => onCreate(name.trim())} onPractice={(level) => onPractice(name.trim(), level)} />}
           />
         </section>
+        <ScreenComparison />
         <HowToPlay />
+        <HauntRecord />
         <div className="mt-3 flex items-center justify-center gap-4 lg:justify-start">
           {onReplayIntro && (
             <button type="button" onClick={onReplayIntro} className={FOOT_LINK}>Replay the opening</button>
